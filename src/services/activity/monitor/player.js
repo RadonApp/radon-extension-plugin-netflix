@@ -12,14 +12,19 @@ export default class PlayerMonitor extends EventEmitter {
         this.$video = null;
         this.video = null;
 
+        // Bind to application events
+        this.main.application.on('navigate.from', (path) => this._onNavigateFrom(path));
+        this.main.application.on('navigate.to', (path) => this._onNavigateTo(path));
+    }
+
+    initialize() {
+        this.$video = null;
+        this.video = null;
+
         // Construct mutation observer
         this.observer = new MutationObserver(
             (mutations) => this._onMutations(mutations)
         );
-
-        // Bind to application events
-        this.main.application.on('navigate.from', (path) => this._onNavigateFrom(path));
-        this.main.application.on('navigate.to', (path) => this._onNavigateTo(path));
     }
 
     dispose() {
@@ -128,14 +133,17 @@ export default class PlayerMonitor extends EventEmitter {
             return;
         }
 
-        // Emit "open" event
-        this.emit('open', parseInt(videoId));
+        // Initialize player monitor
+        this.initialize();
 
         // Observe player changes
         this.observer.observe(this.main.appMountPoint, {
             childList: true,
             subtree: true
         });
+
+        // Emit "open" event
+        this.emit('open', parseInt(videoId));
     }
 
     // endregion
@@ -151,7 +159,7 @@ export default class PlayerMonitor extends EventEmitter {
             return null;
         }
 
-        return this.video.duration;
+        return this.video.duration * 1000;
     }
 
     _getPlayerTime() {
@@ -159,7 +167,7 @@ export default class PlayerMonitor extends EventEmitter {
             return null;
         }
 
-        return this.video.currentTime;
+        return this.video.currentTime * 1000;
     }
 
     _calculateProgress(time, duration) {

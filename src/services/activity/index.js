@@ -4,8 +4,8 @@ import ActivityService from 'eon.extension.framework/base/services/source/activi
 import Bus from 'eon.extension.framework/core/bus';
 import Registry from 'eon.extension.framework/core/registry';
 import Session, {SessionState} from 'eon.extension.framework/models/activity/session';
-import {Movie, Show, Season, Episode} from 'eon.extension.framework/models/metadata/video';
 
+import Parser from './core/parser';
 import MetadataApi from '../../api/metadata';
 import Plugin from '../../core/plugin';
 import ShimApi from '../../api/shim';
@@ -88,31 +88,27 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onProgress(progress, time, duration) {
-        console.log('_onProgress()', {
-            progress: progress,
-            time: time,
-            duration: duration
-        });
-
         if(this.session === null) {
             console.log('Unable to process "progress" event, no active sessions');
             return;
         }
 
+        // Update activity state
         if(this.session.time !== null) {
-            // Update activity state
             if (time > this.session.time) {
                 this.session.state = SessionState.playing;
             } else if (time <= this.session.time) {
                 this.session.state = SessionState.paused;
             }
-
-            // Emit event
-            this.emit('progress', this.session);
         }
 
         // Add new sample
         this.session.samples.push(time);
+
+        // Emit event
+        if(this.session.time !== null) {
+            this.emit('progress', this.session.dump());
+        }
     }
 
     _onPaused() {
@@ -129,27 +125,29 @@ export class NetflixActivityService extends ActivityService {
 
     // endregion
 
-    _createSession(videoId) {
-        console.log("Creating session for video \"" + videoId + "\"");
+    _createSession(id) {
+        console.log("Creating session for video \"" + id + "\"");
 
-        // Cast `videoId` to an integer
-        videoId = parseInt(videoId);
+        // Cast `id` to an integer
+        id = parseInt(id);
 
         // Reset state
         this.video = null;
         this.session = null;
 
         // Retrieve video metadata
-        MetadataApi.get(videoId).then((metadata) => {
+        MetadataApi.get(id).then((metadata) => {
             console.log('metadata:', metadata);
 
             // Construct metadata object
-            this.video = this._parseMetadata(videoId, metadata);
+            this.video = Parser.parse(id, metadata);
 
             if(this.video === null) {
                 console.warn('Unable to parse metadata:', metadata);
                 return;
             }
+
+            console.log('video:', this.video);
 
             // Construct session
             this.session = new Session(
@@ -158,78 +156,9 @@ export class NetflixActivityService extends ActivityService {
                 this.video,
                 SessionState.LOADING
             );
+
+            console.log('session:', this.session);
         });
-    }
-
-    _parseMetadata(videoId, metadata) {
-        var video = metadata.video;
-
-        if(video.type === 'show') {
-            return this._parseShowMetadata(videoId, video);
-        }
-
-        console.warn('Unknown metadata type: "' + video.type + '"');
-        return null;
-    }
-
-    _parseMovieMetadata(videoId, item) {
-
-    }
-
-    _parseShowMetadata(videoId, show) {
-        var season, episode;
-        var match = false;
-
-        // Iterate over seasons
-        for(var i = 0; i < show.seasons.length; ++i) {
-            season = show.seasons[i];
-
-            // Iterate over season episodes for match
-            for(var j = 0; j < season.episodes.length; ++j) {
-                episode = season.episodes[j];
-
-                if(episode.id === videoId) {
-                    match = true;
-                    break;
-                }
-            }
-
-            if(match) {
-                break;
-            }
-        }
-
-        if(!match) {
-            console.warn('Unable to find metadata for episode "' + videoId + '"');
-            return null;
-        }
-
-        // Construct metadata
-        return new Episode(
-            this.plugin,
-            videoId,
-            episode.title,
-            episode.seq,
-            episode.runtime * 1000,
-
-            new Show(
-                this.plugin,
-                show.id,
-                show.title
-            ),
-            new Season(
-                this.plugin,
-                season.id,
-                season.title,
-                season.seq,
-
-                new Show(
-                    this.plugin,
-                    show.id,
-                    show.title
-                )
-            )
-        )
     }
 }
 
