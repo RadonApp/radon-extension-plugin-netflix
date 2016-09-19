@@ -11,6 +11,8 @@ import Plugin from '../../core/plugin';
 import ShimApi from '../../api/shim';
 import Monitor from './monitor';
 
+var PROGRESS_EVENT_INTERVAL = 5000;  // (in milliseconds)
+
 
 export class NetflixActivityService extends ActivityService {
     constructor() {
@@ -20,6 +22,7 @@ export class NetflixActivityService extends ActivityService {
         this.video = null;
 
         this._nextSessionKey = 0;
+        this._lastProgressEmittedAt = null;
 
         // Configure event bus
         Bus.configure('service/activity');
@@ -78,27 +81,39 @@ export class NetflixActivityService extends ActivityService {
     // region Event handlers
 
     _onOpen(videoId) {
-        console.log('_onOpen()', videoId);
-
-        this._createSession(videoId);
+        this._createSession(videoId).then((session) => {
+            // Emit "created" event
+            this.emit('created', session.dump());
+        }, (error) => {
+            // Unable to create session
+            console.warn('Unable to create session:', error);
+        });
     }
 
     _onPlaying() {
-        console.log('_onPlaying()');
+        if(this.session !== null && this.session.state !== SessionState.playing) {
+            // Update state
+            this.session.state = SessionState.playing;
+
+            // Emit event
+            this.emit('started', this.session.dump());
+        }
     }
 
     _onProgress(progress, time, duration) {
         if(this.session === null) {
-            console.log('Unable to process "progress" event, no active sessions');
+            console.warn('Unable to process "progress" event, no active sessions');
             return;
         }
 
         // Update activity state
+        var state = this.session.state;
+
         if(this.session.time !== null) {
             if (time > this.session.time) {
-                this.session.state = SessionState.playing;
+                state = SessionState.playing;
             } else if (time <= this.session.time) {
-                this.session.state = SessionState.paused;
+                state = SessionState.paused;
             }
         }
 
@@ -106,58 +121,109 @@ export class NetflixActivityService extends ActivityService {
         this.session.samples.push(time);
 
         // Emit event
-        if(this.session.time !== null) {
-            this.emit('progress', this.session.dump());
+        if(this.session.state !== state) {
+            var previous = this.session.state;
+            this.session.state = state;
+
+            // Emit state change
+            this._onStateChanged(previous, state)
+        } else if(this.session.state === SessionState.playing && this.session.time !== null) {
+            this.session.state = state;
+
+            // Emit progress
+            if(this._shouldEmitProgress()) {
+                // Emit event
+                this.emit('progress', this.session.dump());
+
+                // Update timestamp
+                this._lastProgressEmittedAt = Date.now();
+            }
         }
     }
 
+    _onStateChanged(previous, current) {
+        if(this.session === null) {
+            return false;
+        }
+
+        // Determine event from state change
+        var event = null;
+
+        if((previous === SessionState.null || previous === SessionState.paused) && current === SessionState.playing) {
+            event = 'started';
+        } else if(current === SessionState.paused) {
+            event = 'paused';
+        }
+
+        // Emit event
+        this.emit(event, this.session.dump());
+    }
+
+    _shouldEmitProgress() {
+        return (
+            this._lastProgressEmittedAt === null ||
+            Date.now() - this._lastProgressEmittedAt > PROGRESS_EVENT_INTERVAL
+        );
+    }
+
     _onPaused() {
-        console.log('_onPaused()');
+        if(this.session !== null && this.session.state !== SessionState.paused) {
+            // Update state
+            this.session.state = SessionState.paused;
+
+            // Emit event
+            this.emit('paused', this.session.dump());
+        }
     }
 
     _onEnded() {
-        console.log('_onEnded()');
-    }
+        if(this.session !== null && this.session.state !== SessionState.ended) {
+            // Update state
+            this.session.state = SessionState.ended;
 
-    _onShimEvent(e) {
-        console.log('_onShimEvent', e);
+            // Emit event
+            this.emit('ended', this.session.dump());
+        }
     }
 
     // endregion
 
     _createSession(id) {
-        console.log("Creating session for video \"" + id + "\"");
-
         // Cast `id` to an integer
         id = parseInt(id);
 
-        // Reset state
-        this.video = null;
-        this.session = null;
+        // Construct promise
+        return new Promise((resolve, reject) => {
+            console.debug("Creating session for video \"" + id + "\"");
 
-        // Retrieve video metadata
-        MetadataApi.get(id).then((metadata) => {
-            console.log('metadata:', metadata);
+            // Reset state
+            this.video = null;
+            this.session = null;
 
-            // Construct metadata object
-            this.video = Parser.parse(id, metadata);
+            // Retrieve video metadata
+            MetadataApi.get(id).then((metadata) => {
+                // Construct metadata object
+                this.video = Parser.parse(id, metadata);
 
-            if(this.video === null) {
-                console.warn('Unable to parse metadata:', metadata);
-                return;
-            }
+                if(this.video === null) {
+                    console.warn('Unable to parse metadata:', metadata);
 
-            console.log('video:', this.video);
+                    // Reject promise
+                    reject(new Error('Unable to parse metadata'));
+                    return;
+                }
 
-            // Construct session
-            this.session = new Session(
-                this.plugin,
-                this._nextSessionKey++,
-                this.video,
-                SessionState.LOADING
-            );
+                // Construct session
+                this.session = new Session(
+                    this.plugin,
+                    this._nextSessionKey++,
+                    this.video,
+                    SessionState.LOADING
+                );
 
-            console.log('session:', this.session);
+                // Resolve promise
+                resolve(this.session);
+            });
         });
     }
 }
