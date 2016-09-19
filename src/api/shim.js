@@ -50,7 +50,7 @@ class NetflixShimApi extends EventEmitter {
             return;
         }
 
-        console.log('Received "' + e.detail.type + '" event:', e.detail.data);
+        console.debug('Received "' + e.detail.type + '" event:', e.detail.data);
 
         // Emit event
         this.emit(e.detail.type, e.detail.data || null);
