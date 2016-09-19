@@ -9,6 +9,7 @@ export default class PlayerMonitor extends EventEmitter {
         this.service = main.service;
         this.plugin = main.service.plugin;
 
+        this.videoId = null;
         this.videoElement = null;
         this.videoListeners = {};
 
@@ -149,7 +150,11 @@ export default class PlayerMonitor extends EventEmitter {
 
     _onVideoMutationAction(action, node) {
         if(action === "add") {
+            // Bind to video events
             this._bind(node);
+
+            // Video loaded
+            this._onVideoLoaded();
         } else if(action === "remove") {
             this._unbind();
         }
@@ -169,13 +174,6 @@ export default class PlayerMonitor extends EventEmitter {
             return;
         }
 
-        // Retrieve video key
-        var videoId = path.substring(path.lastIndexOf('/') + 1);
-
-        if(!videoId || videoId.length < 1) {
-            return;
-        }
-
         // Initialize player monitor
         this.initialize();
 
@@ -184,9 +182,25 @@ export default class PlayerMonitor extends EventEmitter {
             childList: true,
             subtree: true
         });
+    }
+
+    _onVideoLoaded() {
+        var path = location.pathname;
+
+        // Retrieve video key
+        var videoId = path.substring(path.lastIndexOf('/') + 1);
+
+        if(!videoId || videoId.length < 1) {
+            return;
+        }
 
         // Emit "open" event
-        this.emit('open', parseInt(videoId));
+        if(videoId !== this.videoId) {
+            this.videoId = videoId;
+
+            // Emit event
+            this.emit('open', parseInt(videoId));
+        }
     }
 
     // endregion
