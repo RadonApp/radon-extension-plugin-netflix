@@ -1,15 +1,15 @@
-import OptionsService from 'eon.extension.framework/base/services/source/activity';
+import ConfigurationService from 'eon.extension.framework/services/configuration';
 import Registry from 'eon.extension.framework/core/registry';
 
 import Plugin from '../../core/plugin';
 import Options from './options';
 
 
-export class NetflixOptionsService extends OptionsService {
+export class NetflixConfigurationService extends ConfigurationService {
     constructor() {
         super(Plugin, Options);
     }
 }
 
 // Register service
-Registry.registerService(new NetflixOptionsService());
+Registry.registerService(new NetflixConfigurationService());

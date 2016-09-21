@@ -1,6 +1,6 @@
 import {Resources} from 'eon.extension.browser';
 
-import ActivityService from 'eon.extension.framework/base/services/source/activity';
+import ActivityService from 'eon.extension.framework/services/source/activity';
 import Bus from 'eon.extension.framework/core/bus';
 import Registry from 'eon.extension.framework/core/registry';
 import Session, {SessionState} from 'eon.extension.framework/models/activity/session';
