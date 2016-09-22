@@ -1,6 +1,6 @@
 import {
+    CheckboxOption,
     EnableOption,
-    SwitchOption,
     Group
 } from 'eon.extension.framework/services/configuration/models';
 
@@ -25,7 +25,14 @@ export default [
             requires: ['enabled']
         }),
 
-        new SwitchOption(Plugin, 'sync.ratings', 'Synchronize ratings', {
+        new CheckboxOption(Plugin, 'sync.history', 'Synchronize watched history', {
+            summary: 'Synchronize watched history with your enabled destinations',
+            default: true,
+            requires: ['sync.enabled']
+        }),
+
+        new CheckboxOption(Plugin, 'sync.ratings', 'Synchronize ratings', {
+            summary: 'Synchronize ratings with your enabled destinations',
             default: true,
             requires: ['sync.enabled']
         })
