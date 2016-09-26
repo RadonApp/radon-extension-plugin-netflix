@@ -30,6 +30,8 @@ export class NetflixActivityService extends ActivityService {
         // Initialize activity monitor
         this.monitor = new Monitor(this);
         this.monitor.player.on('open', (videoId) => this._onOpen(videoId));
+        this.monitor.player.on('close', () => this._onClose());
+
         this.monitor.player.on('playing', () => this._onPlaying());
         this.monitor.player.on('paused', () => this._onPaused());
         this.monitor.player.on('ended', () => this._onEnded());
@@ -90,6 +92,16 @@ export class NetflixActivityService extends ActivityService {
         });
     }
 
+    _onClose() {
+        if(this.session !== null && this.session.state !== SessionState.ended) {
+            // Update state
+            this.session.state = SessionState.ended;
+
+            // Emit event
+            this.emit('ended', this.session.dump());
+        }
+    }
+
     _onPlaying() {
         if(this.session !== null && this.session.state !== SessionState.playing) {
             // Update state
@@ -146,6 +158,8 @@ export class NetflixActivityService extends ActivityService {
             return false;
         }
 
+        console.debug('_onStateChanged(%o, %o)', previous, current);
+
         // Determine event from state change
         var event = null;
 
@@ -167,6 +181,8 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onPaused() {
+        console.debug('_onPaused()');
+
         if(this.session !== null && this.session.state !== SessionState.paused) {
             // Update state
             this.session.state = SessionState.paused;
@@ -177,6 +193,8 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onEnded() {
+        console.debug('_onEnded()');
+
         if(this.session !== null && this.session.state !== SessionState.ended) {
             // Update state
             this.session.state = SessionState.ended;

@@ -38,6 +38,9 @@ export default class PlayerMonitor extends EventEmitter {
 
         // Unbind player events
         this._unbind();
+
+        // Emit player "close" event
+        this.emit('close');
     }
 
     // region Video player events
