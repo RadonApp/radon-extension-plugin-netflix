@@ -17,6 +17,16 @@ export default [
             default: true,
             requires: ['enabled']
         }),
+
+        new CheckboxOption(Plugin, 'activity.movies', 'Movies', {
+            default: true,
+            requires: ['activity.enabled']
+        }),
+
+        new CheckboxOption(Plugin, 'activity.episodes', 'Episodes', {
+            default: true,
+            requires: ['activity.enabled']
+        }),
     ]),
 
     new Group(Plugin, 'sync', 'Sync', [
@@ -25,14 +35,12 @@ export default [
             requires: ['enabled']
         }),
 
-        new CheckboxOption(Plugin, 'sync.history', 'Synchronize watched history', {
-            summary: 'Synchronize watched history with your enabled destinations',
+        new CheckboxOption(Plugin, 'sync.history', 'Watched history', {
             default: true,
             requires: ['sync.enabled']
         }),
 
-        new CheckboxOption(Plugin, 'sync.ratings', 'Synchronize ratings', {
-            summary: 'Synchronize ratings with your enabled destinations',
+        new CheckboxOption(Plugin, 'sync.ratings', 'Ratings', {
             default: true,
             requires: ['sync.enabled']
         })
