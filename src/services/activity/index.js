@@ -231,6 +231,12 @@ export class NetflixActivityService extends ActivityService {
                     return;
                 }
 
+                // Emit "ended" event (if there is an existing session)
+                if(this.session !== null && this.session.state !== SessionState.ended) {
+                    this.session.state = SessionState.ended;
+                    this.emit('ended', this.session.dump());
+                }
+
                 // Construct session
                 this.session = new Session(
                     this.plugin,
