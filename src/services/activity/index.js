@@ -165,8 +165,10 @@ export class NetflixActivityService extends ActivityService {
 
         if((previous === SessionState.null || previous === SessionState.paused) && current === SessionState.playing) {
             event = 'started';
-        } else if(current === SessionState.paused) {
+        } else if(previous === SessionState.playing && current === SessionState.paused) {
             event = 'paused';
+        } else {
+            return;
         }
 
         // Emit event
