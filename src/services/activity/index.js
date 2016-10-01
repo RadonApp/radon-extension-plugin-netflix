@@ -216,6 +216,12 @@ export class NetflixActivityService extends ActivityService {
         return new Promise((resolve, reject) => {
             console.debug("Creating session for video \"" + id + "\"");
 
+            // Emit "ended" event (if there is an existing session)
+            if(this.session !== null && this.session.state !== SessionState.ended) {
+                this.session.state = SessionState.ended;
+                this.emit('ended', this.session.dump());
+            }
+
             // Reset state
             this.video = null;
             this.session = null;
@@ -231,12 +237,6 @@ export class NetflixActivityService extends ActivityService {
                     // Reject promise
                     reject(new Error('Unable to parse metadata'));
                     return;
-                }
-
-                // Emit "ended" event (if there is an existing session)
-                if(this.session !== null && this.session.state !== SessionState.ended) {
-                    this.session.state = SessionState.ended;
-                    this.emit('ended', this.session.dump());
                 }
 
                 // Construct session
