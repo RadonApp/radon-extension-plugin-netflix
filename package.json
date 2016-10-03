@@ -8,6 +8,8 @@
     "babel-plugin-transform-object-rest-spread": "^6.16.0",
     "babel-preset-es2015": "^6.16.0",
     "babel-preset-react": "^6.16.0",
+    "eslint": "^3.7.0",
+    "eslint-plugin-react": "^6.3.0"
   },
   "dependencies": {
     "eventemitter3": "^1.2.0",
