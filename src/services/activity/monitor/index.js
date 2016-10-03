@@ -41,7 +41,7 @@ export default class Monitor extends EventEmitter {
                         retries++;
                         setTimeout(run, 500);
                     } else {
-                        reject();
+                        reject(new Error('Unable to find application mount point'));
                     }
                 };
 
