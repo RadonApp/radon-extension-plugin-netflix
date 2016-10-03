@@ -1,3 +1,6 @@
+/* global netflix */
+
+
 export class NetflixShim {
     start() {
         // Listen for shim requests
@@ -9,7 +12,7 @@ export class NetflixShim {
 
     emit(type, data) {
         // Construct event
-        var event = new CustomEvent('eon.event', {
+        let event = new CustomEvent('eon.event', {
             detail: {
                 type: type,
                 data: data || null
@@ -41,17 +44,18 @@ export class NetflixShim {
             return;
         }
 
-        var id = e.detail.id;
-        var type = e.detail.type;
+        let id = e.detail.id;
+        let type = e.detail.type;
 
         // Process request
         if(type === 'serverDefs') {
-            return this.resolve(id, netflix.reactContext.models.serverDefs.data);
+            this.resolve(id, netflix.reactContext.models.serverDefs.data);
+            return;
         }
 
         // Unknown request
         console.warn('Received unknown "' + type + '" request');
-        return this.reject(id);
+        this.reject(id);
     }
 }
 

@@ -52,13 +52,12 @@ export class NetflixActivityService extends ActivityService {
     }
 
     inject() {
-        var self = this;
-
         return new Promise((resolve, reject) => {
-            var url = Resources.getUrl('source.netflix.shim/source.netflix.shim.js');
+            let url = Resources.getUrl('source.netflix.shim/source.netflix.shim.js');
 
             // Create script element
-            var script = document.createElement('script');
+            let script = document.createElement('script');
+
             script.src = url;
             script.onload = function() {
                 this.remove();
@@ -119,12 +118,12 @@ export class NetflixActivityService extends ActivityService {
         }
 
         // Update activity state
-        var state = this.session.state;
+        let state = this.session.state;
 
         if(this.session.time !== null) {
-            if (time > this.session.time) {
+            if(time > this.session.time) {
                 state = SessionState.playing;
-            } else if (time <= this.session.time) {
+            } else if(time <= this.session.time) {
                 state = SessionState.paused;
             }
         }
@@ -134,11 +133,12 @@ export class NetflixActivityService extends ActivityService {
 
         // Emit event
         if(this.session.state !== state) {
-            var previous = this.session.state;
+            let previous = this.session.state;
+
             this.session.state = state;
 
             // Emit state change
-            this._onStateChanged(previous, state)
+            this._onStateChanged(previous, state);
         } else if(this.session.state === SessionState.playing && this.session.time !== null) {
             this.session.state = state;
 
@@ -155,13 +155,13 @@ export class NetflixActivityService extends ActivityService {
 
     _onStateChanged(previous, current) {
         if(this.session === null) {
-            return false;
+            return;
         }
 
         console.debug('_onStateChanged(%o, %o)', previous, current);
 
         // Determine event from state change
-        var event = null;
+        let event = null;
 
         if((previous === SessionState.null || previous === SessionState.paused) && current === SessionState.playing) {
             event = 'started';
@@ -210,11 +210,11 @@ export class NetflixActivityService extends ActivityService {
 
     _createSession(id) {
         // Cast `id` to an integer
-        id = parseInt(id);
+        id = parseInt(id, 10);
 
         // Construct promise
         return new Promise((resolve, reject) => {
-            console.debug("Creating session for video \"" + id + "\"");
+            console.debug('Creating session for video "' + id + '"');
 
             // Emit "ended" event (if there is an existing session)
             if(this.session !== null && this.session.state !== SessionState.ended) {

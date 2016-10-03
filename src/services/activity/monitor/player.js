@@ -68,15 +68,15 @@ export default class PlayerMonitor extends EventEmitter {
             return false;
         }
 
-        for(var type in this.videoListeners) {
+        for(let type in this.videoListeners) {
             if(!this.videoListeners.hasOwnProperty(type)) {
                 continue;
             }
 
-            var listeners = this.videoListeners[type];
+            let listeners = this.videoListeners[type];
 
-            for(var i = 0; i < listeners.length; ++i) {
-                var listener = listeners[i];
+            for(let i = 0; i < listeners.length; ++i) {
+                let listener = listeners[i];
 
                 console.debug('Removing event listener %o for type %o', listener, type);
                 this.videoElement.removeEventListener(type, listener);
@@ -93,13 +93,13 @@ export default class PlayerMonitor extends EventEmitter {
         this.videoElement = video;
 
         // Bind player events
-        this._addEventListener('playing',    () => this.emit('playing'));
-        this._addEventListener('pause',      () => this.emit('paused'));
-        this._addEventListener('ended',      () => this.emit('ended'));
+        this._addEventListener('playing', () => this.emit('playing'));
+        this._addEventListener('pause', () => this.emit('paused'));
+        this._addEventListener('ended', () => this.emit('ended'));
 
         this._addEventListener('timeupdate', () => {
-            var time = this._getPlayerTime();
-            var duration = this._getPlayerDuration();
+            let time = this._getPlayerTime();
+            let duration = this._getPlayerDuration();
 
             this.emit(
                 'progress',
@@ -127,7 +127,7 @@ export default class PlayerMonitor extends EventEmitter {
     // region Event handlers
 
     _onMutations(mutations) {
-        for(var i = 0; i < mutations.length; ++i) {
+        for(let i = 0; i < mutations.length; ++i) {
             this._onMutation(mutations[i]);
         }
     }
@@ -140,8 +140,8 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _onMutationActions(action, nodes) {
-        for(var i = 0; i < nodes.length; ++i) {
-            var node = nodes[i];
+        for(let i = 0; i < nodes.length; ++i) {
+            let node = nodes[i];
 
             if(node.tagName !== 'VIDEO') {
                 return;
@@ -152,13 +152,13 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _onVideoMutationAction(action, node) {
-        if(action === "add") {
+        if(action === 'add') {
             // Bind to video events
             this._bind(node);
 
             // Video loaded
             this._onVideoLoaded();
-        } else if(action === "remove") {
+        } else if(action === 'remove') {
             this._unbind();
         }
     }
@@ -188,10 +188,10 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _onVideoLoaded() {
-        var path = location.pathname;
+        let path = location.pathname;
 
         // Retrieve video key
-        var videoId = path.substring(path.lastIndexOf('/') + 1);
+        let videoId = path.substring(path.lastIndexOf('/') + 1);
 
         if(!videoId || videoId.length < 1) {
             return;
@@ -202,7 +202,7 @@ export default class PlayerMonitor extends EventEmitter {
             this.videoId = videoId;
 
             // Emit event
-            this.emit('open', parseInt(videoId));
+            this.emit('open', parseInt(videoId, 10));
         }
     }
 
@@ -211,7 +211,7 @@ export default class PlayerMonitor extends EventEmitter {
     // region Helpers
 
     _round2(num) {
-        return +(Math.round(num + "e+2") + "e-2");
+        return +(Math.round(num + 'e+2') + 'e-2');
     }
 
     _getPlayerDuration() {

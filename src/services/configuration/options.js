@@ -26,7 +26,7 @@ export default [
         new CheckboxOption(Plugin, 'activity.episodes', 'Episodes', {
             default: true,
             requires: ['activity.enabled']
-        }),
+        })
     ]),
 
     new Group(Plugin, 'sync', 'Sync', [

@@ -7,7 +7,7 @@ export default class Parser {
     // region Public methods
 
     static parse(id, metadata) {
-        var item = metadata.video;
+        let item = metadata.video;
 
         if(item.type === 'movie') {
             return Parser.parseMovie(id, item);
@@ -24,15 +24,15 @@ export default class Parser {
     }
 
     static parseEpisodeFromShow(id, show) {
-        var season, episode;
-        var match = false;
+        let season, episode;
+        let match = false;
 
         // Iterate over seasons
-        for(var i = 0; i < show.seasons.length; ++i) {
+        for(let i = 0; i < show.seasons.length; ++i) {
             season = show.seasons[i];
 
             // Iterate over season episodes for match
-            for(var j = 0; j < season.episodes.length; ++j) {
+            for(let j = 0; j < season.episodes.length; ++j) {
                 episode = season.episodes[j];
 
                 if(episode.id === id) {

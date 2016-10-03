@@ -19,7 +19,7 @@ export default class Monitor extends EventEmitter {
 
     bind(document) {
         return new Promise((resolve, reject) => {
-            var retries = 0,
+            let retries = 0,
                 run = () => {
                     this.appMountPoint = document.querySelector('#appMountPoint');
 
@@ -39,10 +39,10 @@ export default class Monitor extends EventEmitter {
 
                     if(retries < 10) {
                         retries++;
-                        setTimeout(run, 500);
-                    } else {
-                        reject(new Error('Unable to find application mount point'));
+                        return setTimeout(run, 500);
                     }
+
+                    return reject(new Error('Unable to find application mount point'));
                 };
 
             run();

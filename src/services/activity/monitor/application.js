@@ -45,8 +45,8 @@ export default class ApplicationMonitor extends EventEmitter {
         }
 
         // Observe children
-        for (var i = 0; i < node.childNodes.length; ++i) {
-            var child = node.childNodes[i];
+        for(let i = 0; i < node.childNodes.length; ++i) {
+            let child = node.childNodes[i];
 
             if(child.tagName !== 'DIV') {
                 continue;
@@ -67,15 +67,15 @@ export default class ApplicationMonitor extends EventEmitter {
     }
 
     _onMutations(mutations) {
-        for(var i = 0; i < mutations.length; ++i) {
+        for(let i = 0; i < mutations.length; ++i) {
             this._onMutation(mutations[i]);
         }
     }
 
     _onMutation(mutation) {
         if(this._isContainer(mutation.target)) {
-            for(var i = 0; i < mutation.addedNodes.length; ++i) {
-                var node = mutation.addedNodes[i];
+            for(let i = 0; i < mutation.addedNodes.length; ++i) {
+                let node = mutation.addedNodes[i];
 
                 if(node.tagName !== 'DIV') {
                     continue;

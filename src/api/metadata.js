@@ -9,7 +9,7 @@ class NetflixMetadataApi {
         return ShimApi.request('serverDefs')
             .then(function(serverDefs) {
                 // Retrieve endpoint identifier
-                return serverDefs.endpointIdentifiers['/metadata']
+                return serverDefs.endpointIdentifiers['/metadata'];
             })
             .then(function(endpointIdentifier) {
                 // Request metadata from netflix api
