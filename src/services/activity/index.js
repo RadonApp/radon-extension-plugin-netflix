@@ -45,7 +45,7 @@ export class NetflixActivityService extends ActivityService {
         // Inject netflix shim
         this.inject().then(() => {
             // Bind activity monitor to document
-            this.monitor.bind(document);
+            return this.monitor.bind(document);
         }, (error) => {
             console.error('Unable to inject shim', error);
         });
