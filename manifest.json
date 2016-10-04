@@ -2,10 +2,6 @@
   "name": "Netflix",
   "version": "0.1.0",
 
-  "permissions": [
-    "https://www.netflix.com/*"
-  ],
-
   "content_scripts": [
     {
       "matches": [
@@ -16,6 +12,13 @@
       ]
     }
   ],
+
+  "permissions": {
+    "origins": [
+      "*://www.netflix.com/*",
+      "*://netflix.com/*"
+    ]
+  },
 
   "web_accessible_resources": [
     "source.netflix.shim/source.netflix.shim.js"
