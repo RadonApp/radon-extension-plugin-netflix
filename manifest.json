@@ -4,8 +4,10 @@
 
   "content_scripts": [
     {
-      "matches": [
-        "https://www.netflix.com/*"
+      "id": "source.netflix/main",
+      "conditions": [
+        {"pageUrl": {"hostEquals": "www.netflix.com"}},
+        {"pageUrl": {"hostEquals": "netflix.com"}}
       ],
       "js": [
         "source.netflix/source.netflix.js"
