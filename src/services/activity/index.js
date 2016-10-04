@@ -24,8 +24,25 @@ export class NetflixActivityService extends ActivityService {
         this._nextSessionKey = 0;
         this._lastProgressEmittedAt = null;
 
+        this.monitor = null;
+    }
+
+    initialize() {
+        super.initialize();
+
         // Configure event bus
         Bus.configure('service/activity');
+
+        // Bind to document
+        this.bind();
+    }
+
+    bind() {
+        if(document.body === null) {
+            console.warn('Document body not loaded yet, will try again in 500ms');
+            setTimeout(() => this.bind(), 500);
+            return;
+        }
 
         // Initialize activity monitor
         this.monitor = new Monitor(this);
@@ -39,9 +56,7 @@ export class NetflixActivityService extends ActivityService {
         this.monitor.player.on('progress', (progress, time, duration) =>
             this._onProgress(progress, time, duration)
         );
-    }
 
-    initialize() {
         // Inject netflix shim
         this.inject().then(() => {
             // Bind activity monitor to document
