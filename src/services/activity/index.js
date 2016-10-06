@@ -2,7 +2,7 @@ import {Resources} from 'eon.extension.browser';
 
 import ActivityService from 'eon.extension.framework/services/source/activity';
 import Registry from 'eon.extension.framework/core/registry';
-import MessagingBus, {ContextTypes} from 'eon.extension.framework/messaging/bus';
+import MessagingBus from 'eon.extension.framework/messaging/bus';
 import Session, {SessionState} from 'eon.extension.framework/models/activity/session';
 
 import Parser from './core/parser';
