@@ -1,8 +1,8 @@
-import {Resources} from 'eon.extension.browser';
+import Extension from 'eon.extension.browser/extension';
 
 import ActivityService from 'eon.extension.framework/services/source/activity';
-import Bus from 'eon.extension.framework/core/bus';
 import Registry from 'eon.extension.framework/core/registry';
+import MessagingBus from 'eon.extension.framework/messaging/bus';
 import Session, {SessionState} from 'eon.extension.framework/models/activity/session';
 
 import Parser from './core/parser';
@@ -30,8 +30,9 @@ export class NetflixActivityService extends ActivityService {
     initialize() {
         super.initialize();
 
-        // Configure event bus
-        Bus.configure('service/activity');
+        // Construct messaging bus
+        this.bus = new MessagingBus(Plugin.id + ':activity');
+        this.bus.connect('eon.extension.core:scrobble');
 
         // Bind to document
         this.bind();
@@ -68,7 +69,7 @@ export class NetflixActivityService extends ActivityService {
 
     inject() {
         return new Promise((resolve, reject) => {
-            let url = Resources.getUrl('source.netflix.shim/source.netflix.shim.js');
+            let url = Extension.getUrl('source/netflix/shim/shim.js');
 
             // Create script element
             let script = document.createElement('script');
@@ -99,7 +100,7 @@ export class NetflixActivityService extends ActivityService {
     _onOpen(videoId) {
         this._createSession(videoId).then((session) => {
             // Emit "created" event
-            this.emit('created', session.dump());
+            this.bus.emit('activity.created', session.dump());
         }, (error) => {
             // Unable to create session
             console.warn('Unable to create session:', error);
@@ -112,7 +113,7 @@ export class NetflixActivityService extends ActivityService {
             this.session.state = SessionState.ended;
 
             // Emit event
-            this.emit('ended', this.session.dump());
+            this.bus.emit('activity.ended', this.session.dump());
         }
     }
 
@@ -122,7 +123,7 @@ export class NetflixActivityService extends ActivityService {
             this.session.state = SessionState.playing;
 
             // Emit event
-            this.emit('started', this.session.dump());
+            this.bus.emit('activity.started', this.session.dump());
         }
     }
 
@@ -160,7 +161,7 @@ export class NetflixActivityService extends ActivityService {
             // Emit progress
             if(this._shouldEmitProgress()) {
                 // Emit event
-                this.emit('progress', this.session.dump());
+                this.bus.emit('activity.progress', this.session.dump());
 
                 // Update timestamp
                 this._lastProgressEmittedAt = Date.now();
@@ -179,15 +180,15 @@ export class NetflixActivityService extends ActivityService {
         let event = null;
 
         if((previous === SessionState.null || previous === SessionState.paused) && current === SessionState.playing) {
-            event = 'started';
+            event = 'activity.started';
         } else if(previous === SessionState.playing && current === SessionState.paused) {
-            event = 'paused';
+            event = 'activity.paused';
         } else {
             return;
         }
 
         // Emit event
-        this.emit(event, this.session.dump());
+        this.bus.emit(event, this.session.dump());
     }
 
     _shouldEmitProgress() {
@@ -205,7 +206,7 @@ export class NetflixActivityService extends ActivityService {
             this.session.state = SessionState.paused;
 
             // Emit event
-            this.emit('paused', this.session.dump());
+            this.bus.emit('activity.paused', this.session.dump());
         }
     }
 
@@ -217,7 +218,7 @@ export class NetflixActivityService extends ActivityService {
             this.session.state = SessionState.ended;
 
             // Emit event
-            this.emit('ended', this.session.dump());
+            this.bus.emit('activity.ended', this.session.dump());
         }
     }
 
@@ -234,7 +235,7 @@ export class NetflixActivityService extends ActivityService {
             // Emit "ended" event (if there is an existing session)
             if(this.session !== null && this.session.state !== SessionState.ended) {
                 this.session.state = SessionState.ended;
-                this.emit('ended', this.session.dump());
+                this.bus.emit('activity.ended', this.session.dump());
             }
 
             // Reset state
