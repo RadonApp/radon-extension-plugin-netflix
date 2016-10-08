@@ -10,7 +10,9 @@
         {"pageUrl": {"hostEquals": "netflix.com"}}
       ],
       "js": [
-        "source.netflix/source.netflix.js"
+        "vendor.js",
+        "shared.js",
+        "source/netflix/netflix.js"
       ]
     }
   ],
