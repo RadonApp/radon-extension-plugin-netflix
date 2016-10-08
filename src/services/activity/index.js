@@ -1,4 +1,4 @@
-import {Resources} from 'eon.extension.browser';
+import Extension from 'eon.extension.browser/extension';
 
 import ActivityService from 'eon.extension.framework/services/source/activity';
 import Registry from 'eon.extension.framework/core/registry';
@@ -69,7 +69,7 @@ export class NetflixActivityService extends ActivityService {
 
     inject() {
         return new Promise((resolve, reject) => {
-            let url = Resources.getUrl('source.netflix.shim/source.netflix.shim.js');
+            let url = Extension.getUrl('source/netflix/shim/shim.js');
 
             // Create script element
             let script = document.createElement('script');
