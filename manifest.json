@@ -24,6 +24,6 @@
   ],
 
   "web_accessible_resources": [
-    "source.netflix.shim/source.netflix.shim.js"
+    "source/netflix/shim/shim.js"
   ]
 }
