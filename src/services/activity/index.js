@@ -23,6 +23,7 @@ export class NetflixActivityService extends ActivityService {
 
         this._nextSessionKey = 0;
         this._lastProgressEmittedAt = null;
+        this._pauseTimeout = null;
 
         this.monitor = null;
     }
@@ -69,15 +70,8 @@ export class NetflixActivityService extends ActivityService {
 
     inject() {
         return new Promise((resolve, reject) => {
-            let url = Extension.getUrl('/source/netflix/shim/shim.js');
-
-            // Create script element
-            let script = document.createElement('script');
-
-            script.src = url;
-            script.onload = function() {
-                this.remove();
-            };
+            // Inject scripts
+            let script = this.createScript(document, '/source/netflix/shim/shim.js');
 
             // Bind shim api to page
             ShimApi.bind(document);
@@ -89,15 +83,30 @@ export class NetflixActivityService extends ActivityService {
 
             // TODO implement timeout?
 
-            // Insert element into page
-            (document.head || document.documentElement)
-                .appendChild(script);
+            // Insert script into page
+            (document.head || document.documentElement).appendChild(script);
         });
+    }
+
+    createScript(document, path) {
+        let url = Extension.getUrl(path);
+
+        // Create script element
+        let script = document.createElement('script');
+
+        script.src = url;
+        script.onload = function() {
+            this.remove();
+        };
+
+        return script;
     }
 
     // region Event handlers
 
     _onOpen(videoId) {
+        console.debug('_onOpen()');
+
         this._createSession(videoId).then((session) => {
             // Emit "created" event
             this.bus.emit('activity.created', session.dump());
@@ -108,6 +117,8 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onClose() {
+        console.debug('_onClose()');
+
         if(this.session !== null && this.session.state !== SessionState.ended) {
             // Update state
             this.session.state = SessionState.ended;
@@ -118,16 +129,21 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onPlaying() {
-        if(this.session !== null && this.session.state !== SessionState.playing) {
-            // Update state
-            this.session.state = SessionState.playing;
+        console.debug('_onPlaying()');
 
-            // Emit event
-            this.bus.emit('activity.started', this.session.dump());
+        if(this.session !== null && this.session.state !== SessionState.playing) {
+            // Emit "started" event
+            this._start();
+
+            // Clear stalled state
+            this.session.stalledAt = null;
+            this.session.stalledPreviousState = null;
         }
     }
 
     _onProgress(progress, time, duration) {
+        console.debug('_onProgress()');
+
         if(this.session === null) {
             console.warn('Unable to process "progress" event, no active sessions');
             return;
@@ -138,9 +154,27 @@ export class NetflixActivityService extends ActivityService {
 
         if(this.session.time !== null) {
             if(time > this.session.time) {
+                // Progress changed
                 state = SessionState.playing;
+
+                // Clear stalled state
+                this.session.stalledAt = null;
+                this.session.stalledPreviousState = null;
             } else if(time <= this.session.time) {
-                state = SessionState.paused;
+                // Progress hasn't changed
+                if(this.session.state === SessionState.stalled && Date.now() - this.session.stalledAt > 5000) {
+                    // Stalled for over 5 seconds, assume paused
+                    state = SessionState.paused;
+                } else {
+                    // Store current state
+                    this.session.stalledPreviousState = this.session.state;
+
+                    // Switch to stalled state
+                    state = SessionState.stalled;
+
+                    // Update `stalledAt` timestamp
+                    this.session.stalledAt = Date.now();
+                }
             }
         }
 
@@ -149,23 +183,13 @@ export class NetflixActivityService extends ActivityService {
 
         // Emit event
         if(this.session.state !== state) {
-            let previous = this.session.state;
-
-            this.session.state = state;
-
-            // Emit state change
-            this._onStateChanged(previous, state);
+            // Process state change
+            this._onStateChanged(this.session.state, state);
         } else if(this.session.state === SessionState.playing && this.session.time !== null) {
             this.session.state = state;
 
             // Emit progress
-            if(this._shouldEmitProgress()) {
-                // Emit event
-                this.bus.emit('activity.progress', this.session.dump());
-
-                // Update timestamp
-                this._lastProgressEmittedAt = Date.now();
-            }
+            this._progress();
         }
     }
 
@@ -175,20 +199,26 @@ export class NetflixActivityService extends ActivityService {
         }
 
         console.debug('_onStateChanged(%o, %o)', previous, current);
+        console.debug(' - stalledPreviousState', this.session.stalledPreviousState);
 
-        // Determine event from state change
-        let event = null;
-
+        // Started
         if((previous === SessionState.null || previous === SessionState.paused) && current === SessionState.playing) {
-            event = 'activity.started';
-        } else if(previous === SessionState.playing && current === SessionState.paused) {
-            event = 'activity.paused';
-        } else {
+            // Emit "started" event
+            this._start();
             return;
         }
 
-        // Emit event
-        this.bus.emit(event, this.session.dump());
+        // Paused
+        if(previous === SessionState.playing && current === SessionState.paused) {
+            // Emit "paused" event
+            this._pause();
+            return;
+        }
+
+        console.warn('Unknown state transition, previous: %o, current: %o', previous, current);
+
+        // Update state
+        this.session.state = current;
     }
 
     _shouldEmitProgress() {
@@ -202,11 +232,8 @@ export class NetflixActivityService extends ActivityService {
         console.debug('_onPaused()');
 
         if(this.session !== null && this.session.state !== SessionState.paused) {
-            // Update state
-            this.session.state = SessionState.paused;
-
-            // Emit event
-            this.bus.emit('activity.paused', this.session.dump());
+            // Emit "paused" event
+            this._pause();
         }
     }
 
@@ -267,6 +294,80 @@ export class NetflixActivityService extends ActivityService {
                 resolve(this.session);
             });
         });
+    }
+
+    _start() {
+        if(this.session === null) {
+            return;
+        }
+
+        if(this.session.state === SessionState.stalled) {
+            // Update session with previous state
+            if(this.session.stalledPreviousState !== null) {
+                this.session.state = this.session.stalledPreviousState;
+            } else {
+                this.session.state = SessionState.null;
+            }
+        }
+
+        if(this.session.state === SessionState.playing) {
+            return;
+        }
+
+        // Clear pause timeout
+        if(this._pauseTimeout !== null) {
+            clearTimeout(this._pauseTimeout);
+            this._pauseTimeout = null;
+        }
+
+        // Update state
+        this.session.state = SessionState.playing;
+
+        // Emit event
+        this.bus.emit('activity.started', this.session.dump());
+    }
+
+    _progress() {
+        if(this.session === null || !this._shouldEmitProgress()) {
+            return;
+        }
+
+        // Clear pause timeout
+        if(this._pauseTimeout !== null) {
+            clearTimeout(this._pauseTimeout);
+            this._pauseTimeout = null;
+        }
+
+        // Update state
+        this.session.state = SessionState.playing;
+
+        // Emit event
+        this.bus.emit('activity.progress', this.session.dump());
+
+        // Update timestamp
+        this._lastProgressEmittedAt = Date.now();
+    }
+
+    _pause() {
+        if(this.session.state === SessionState.pausing || this.session.state === SessionState.paused) {
+            return;
+        }
+
+        // Update state
+        this.session.state = SessionState.pausing;
+
+        // Send pause event in 5 seconds
+        this._pauseTimeout = setTimeout(() => {
+            if(this.session === null || this.session.state !== SessionState.pausing) {
+                return;
+            }
+
+            // Update state
+            this.session.state = SessionState.paused;
+
+            // Emit event
+            this.bus.emit('activity.paused', this.session.dump());
+        }, 8000);
     }
 }
 
