@@ -69,7 +69,7 @@ export class NetflixActivityService extends ActivityService {
 
     inject() {
         return new Promise((resolve, reject) => {
-            let url = Extension.getUrl('source/netflix/shim/shim.js');
+            let url = Extension.getUrl('/source/netflix/shim/shim.js');
 
             // Create script element
             let script = document.createElement('script');
