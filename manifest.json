@@ -6,8 +6,14 @@
     {
       "id": "source.netflix/main",
       "conditions": [
-        {"pageUrl": {"hostEquals": "www.netflix.com"}},
-        {"pageUrl": {"hostEquals": "netflix.com"}}
+        {
+          "pattern": "*://netflix.com/*",
+          "pageUrl": {"hostEquals": "netflix.com"}
+        },
+        {
+          "pattern": "*://www.netflix.com/*",
+          "pageUrl": {"hostEquals": "www.netflix.com"}
+        }
       ],
       "js": [
         "vendor.js",
@@ -16,13 +22,6 @@
       ]
     }
   ],
-
-  "permissions": {
-    "origins": [
-      "*://www.netflix.com/*",
-      "*://netflix.com/*"
-    ]
-  },
 
   "web_accessible_resources": [
     "source.netflix.shim/source.netflix.shim.js"
