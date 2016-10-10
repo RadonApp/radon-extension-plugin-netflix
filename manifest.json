@@ -1,18 +1,21 @@
 {
   "name": "Netflix",
-  "version": "0.1.0",
-
+  "version": "0.2.0",
   "content_scripts": [
     {
       "id": "source.netflix/main",
       "conditions": [
         {
           "pattern": "*://netflix.com/*",
-          "pageUrl": {"hostEquals": "netflix.com"}
+          "pageUrl": {
+            "hostEquals": "netflix.com"
+          }
         },
         {
           "pattern": "*://www.netflix.com/*",
-          "pageUrl": {"hostEquals": "www.netflix.com"}
+          "pageUrl": {
+            "hostEquals": "www.netflix.com"
+          }
         }
       ],
       "js": [
@@ -22,7 +25,6 @@
       ]
     }
   ],
-
   "web_accessible_resources": [
     "source/netflix/shim/shim.js"
   ]
