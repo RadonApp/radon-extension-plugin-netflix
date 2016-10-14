@@ -1,6 +1,6 @@
 {
   "name": "Netflix",
-  "version": "0.2.0",
+  "version": "0.2.6",
   "content_scripts": [
     {
       "id": "source.netflix/main",
