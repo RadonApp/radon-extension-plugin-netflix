@@ -105,8 +105,9 @@ export class NetflixActivityService extends ActivityService {
     // region Event handlers
 
     _onOpen(videoId) {
-        console.debug('_onOpen()');
+        console.log('Played opened (videoId: %o)', videoId);
 
+        // Create new session
         this._createSession(videoId).then((session) => {
             // Emit "created" event
             this.bus.emit('activity.created', session.dump());
@@ -117,7 +118,7 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onClose() {
-        console.debug('_onClose()');
+        console.debug('Player closed');
 
         if(this.session !== null && this.session.state !== SessionState.ended) {
             // Update state
@@ -129,7 +130,7 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onPlaying() {
-        console.debug('_onPlaying()');
+        console.debug('Video playing');
 
         if(this.session !== null && this.session.state !== SessionState.playing) {
             // Emit "started" event
@@ -142,7 +143,7 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onProgress(progress, time, duration) {
-        console.debug('_onProgress()');
+        console.debug('Video progress (progress: %o, time: %o, duration: %o)', progress, time, duration);
 
         if(this.session === null) {
             console.warn('Unable to process "progress" event, no active sessions');
@@ -198,8 +199,7 @@ export class NetflixActivityService extends ActivityService {
             return;
         }
 
-        console.debug('_onStateChanged(%o, %o)', previous, current);
-        console.debug(' - stalledPreviousState', this.session.stalledPreviousState);
+        console.debug('Video state changed: %o -> %o', previous, current);
 
         // Started
         if((previous === SessionState.null || previous === SessionState.paused) && current === SessionState.playing) {
@@ -215,7 +215,7 @@ export class NetflixActivityService extends ActivityService {
             return;
         }
 
-        console.warn('Unknown state transition, previous: %o, current: %o', previous, current);
+        console.warn('Unknown state transition: %o -> %o', previous, current);
 
         // Update state
         this.session.state = current;
@@ -229,7 +229,7 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onPaused() {
-        console.debug('_onPaused()');
+        console.debug('Video paused');
 
         if(this.session !== null && this.session.state !== SessionState.paused) {
             // Emit "paused" event
@@ -238,7 +238,7 @@ export class NetflixActivityService extends ActivityService {
     }
 
     _onEnded() {
-        console.debug('_onEnded()');
+        console.debug('Video ended');
 
         if(this.session !== null && this.session.state !== SessionState.ended) {
             // Update state
