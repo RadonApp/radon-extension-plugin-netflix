@@ -5,7 +5,7 @@ import Manifest from '../../manifest.json';
 
 export class NetflixPlugin extends SourcePlugin {
     constructor() {
-        super('netflix', 'Netflix', Manifest);
+        super('netflix', Manifest);
     }
 }
 
