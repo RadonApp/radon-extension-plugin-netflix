@@ -1,3 +1,5 @@
+import {round} from 'eon.extension.framework/core/helpers';
+
 import EventEmitter from 'eventemitter3';
 
 
@@ -210,10 +212,6 @@ export default class PlayerMonitor extends EventEmitter {
 
     // region Helpers
 
-    _round2(num) {
-        return +(Math.round(num + 'e+2') + 'e-2');
-    }
-
     _getPlayerDuration() {
         if(this.videoElement === null || this.videoElement.duration === 0) {
             return null;
@@ -231,7 +229,7 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _calculateProgress(time, duration) {
-        return this._round2((parseFloat(time) / duration) * 100);
+        return round((parseFloat(time) / duration) * 100, 2);
     }
 
     // endregion
