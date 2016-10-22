@@ -1,5 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
+import Log from '../../../core/logger';
 import ApplicationMonitor from './application';
 import PlayerMonitor from './player';
 
@@ -35,7 +36,7 @@ export default class Monitor extends EventEmitter {
                     }
 
                     // Unable to find the "#appMountPoint" element
-                    console.warn('Unable to find the "#appMountPoint" element, will try again in 500ms');
+                    Log.info('Unable to find the "#appMountPoint" element, will try again in 500ms');
 
                     if(retries < 10) {
                         retries++;

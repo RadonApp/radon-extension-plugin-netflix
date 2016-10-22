@@ -1,5 +1,6 @@
 import {Movie, Show, Season, Episode} from 'eon.extension.framework/models/metadata/video';
 
+import Log from '../../../core/logger';
 import Plugin from '../../../core/plugin';
 
 
@@ -15,7 +16,7 @@ export default class Parser {
             return Parser.parseEpisodeFromShow(id, item);
         }
 
-        console.warn('Unknown metadata type: "' + item.type + '"');
+        Log.warn('Unknown metadata type: "' + item.type + '"');
         return null;
     }
 
@@ -47,7 +48,7 @@ export default class Parser {
         }
 
         if(!match) {
-            console.warn('Unable to find metadata for episode "' + id + '"');
+            Log.warn('Unable to find metadata for episode "' + id + '"');
             return null;
         }
 

@@ -7,6 +7,7 @@ import Session, {SessionState} from 'eon.extension.framework/models/activity/ses
 
 import Parser from './core/parser';
 import MetadataApi from '../../api/metadata';
+import Log from '../../core/logger';
 import Plugin from '../../core/plugin';
 import ShimApi from '../../api/shim';
 import Monitor from './monitor';
@@ -41,7 +42,7 @@ export class NetflixActivityService extends ActivityService {
 
     bind() {
         if(document.body === null) {
-            console.warn('Document body not loaded yet, will try again in 500ms');
+            Log.info('Document body not loaded yet, will try again in 500ms');
             setTimeout(() => this.bind(), 500);
             return;
         }

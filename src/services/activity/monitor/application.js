@@ -1,5 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
+import Log from '../../../core/logger';
+
 
 export default class ApplicationMonitor extends EventEmitter {
     constructor(main) {
@@ -25,7 +27,7 @@ export default class ApplicationMonitor extends EventEmitter {
 
         // Emit "navigate.from" event
         if(this.currentPath !== null) {
-            console.debug('Navigating away from path: %o', this.currentPath);
+            Log.debug('Navigating away from path: %o', this.currentPath);
             this.emit('navigate.from', this.currentPath);
         }
 
@@ -33,7 +35,7 @@ export default class ApplicationMonitor extends EventEmitter {
         this.currentPath = location.pathname;
 
         // Emit "navigate.to" event
-        console.debug('Navigating to path: %o', this.currentPath);
+        Log.debug('Navigating to path: %o', this.currentPath);
         this.emit('navigate.to', this.currentPath);
     }
 

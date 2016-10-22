@@ -2,6 +2,8 @@ import {round} from 'eon.extension.framework/core/helpers';
 
 import EventEmitter from 'eventemitter3';
 
+import Log from '../../../core/logger';
+
 
 export default class PlayerMonitor extends EventEmitter {
     constructor(main) {
@@ -21,7 +23,7 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     initialize() {
-        console.debug('Initializing player monitor');
+        Log.debug('Initializing player monitor');
 
         this.videoElement = null;
 
@@ -32,7 +34,7 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     dispose() {
-        console.debug('Disposing player monitor');
+        Log.debug('Disposing player monitor');
 
         // Disconnect mutation observer
         this.observer.disconnect();
@@ -53,8 +55,8 @@ export default class PlayerMonitor extends EventEmitter {
         }
 
         // Add event listener
-        console.debug('Adding event listener %o for type %o', listener, type);
         this.videoElement.addEventListener(type, listener);
+        Log.debug('Adding event listener %o for type %o', listener, type);
 
         // Store listener reference
         if(typeof this.videoListeners[type] === 'undefined') {
@@ -80,8 +82,8 @@ export default class PlayerMonitor extends EventEmitter {
             for(let i = 0; i < listeners.length; ++i) {
                 let listener = listeners[i];
 
-                console.debug('Removing event listener %o for type %o', listener, type);
                 this.videoElement.removeEventListener(type, listener);
+                Log.debug('Removing event listener %o for type %o', listener, type);
             }
         }
 
@@ -89,7 +91,7 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _bind(video) {
-        console.debug('Binding to video element: %o', video);
+        Log.debug('Binding to video element: %o', video);
 
         // Update state
         this.videoElement = video;
