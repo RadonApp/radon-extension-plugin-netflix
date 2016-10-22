@@ -12,8 +12,11 @@ export default class Monitor extends EventEmitter {
         this.service = service;
 
         this.appMountPoint = null;
+        this.application = null;
+        this.player = null;
+    }
 
-        // Initialize children
+    initialize() {
         this.application = new ApplicationMonitor(this);
         this.player = new PlayerMonitor(this);
     }

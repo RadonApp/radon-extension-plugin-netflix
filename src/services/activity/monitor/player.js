@@ -1,4 +1,5 @@
-import {round} from 'eon.extension.framework/core/helpers';
+import {isDefined, round} from 'eon.extension.framework/core/helpers';
+import {Identifier, KeyType} from 'eon.extension.framework/models/activity/identifier';
 
 import EventEmitter from 'eventemitter3';
 
@@ -13,9 +14,10 @@ export default class PlayerMonitor extends EventEmitter {
         this.service = main.service;
         this.plugin = main.service.plugin;
 
-        this.videoId = null;
-        this.videoElement = null;
-        this.videoListeners = {};
+        this._currentIdentifier = null;
+
+        this._videoNode = null;
+        this._videoListeners = {};
 
         // Bind to application events
         this.main.application.on('navigate.from', (path) => this._onNavigateFrom(path));
@@ -25,7 +27,7 @@ export default class PlayerMonitor extends EventEmitter {
     initialize() {
         Log.debug('Initializing player monitor');
 
-        this.videoElement = null;
+        this._videoNode = null;
 
         // Construct mutation observer
         this.observer = new MutationObserver(
@@ -44,46 +46,46 @@ export default class PlayerMonitor extends EventEmitter {
         this._unbind();
 
         // Emit player "close" event
-        this.emit('close');
+        this.emit('closed', this._currentIdentifier);
     }
 
     // region Video player events
 
     _addEventListener(type, listener) {
-        if(!this.videoElement) {
+        if(!this._videoNode) {
             return false;
         }
 
         // Add event listener
-        this.videoElement.addEventListener(type, listener);
         Log.debug('Adding event listener %o for type %o', listener, type);
+        this._videoNode.addEventListener(type, listener);
 
         // Store listener reference
-        if(typeof this.videoListeners[type] === 'undefined') {
-            this.videoListeners[type] = [];
+        if(typeof this._videoListeners[type] === 'undefined') {
+            this._videoListeners[type] = [];
         }
 
-        this.videoListeners[type].push(listener);
+        this._videoListeners[type].push(listener);
         return true;
     }
 
     _removeEventListeners() {
-        if(!this.videoElement) {
+        if(!this._videoNode) {
             return false;
         }
 
-        for(let type in this.videoListeners) {
-            if(!this.videoListeners.hasOwnProperty(type)) {
+        for(let type in this._videoListeners) {
+            if(!this._videoListeners.hasOwnProperty(type)) {
                 continue;
             }
 
-            let listeners = this.videoListeners[type];
+            let listeners = this._videoListeners[type];
 
             for(let i = 0; i < listeners.length; ++i) {
                 let listener = listeners[i];
 
-                this.videoElement.removeEventListener(type, listener);
                 Log.debug('Removing event listener %o for type %o', listener, type);
+                this._videoNode.removeEventListener(type, listener);
             }
         }
 
@@ -94,36 +96,28 @@ export default class PlayerMonitor extends EventEmitter {
         Log.debug('Binding to video element: %o', video);
 
         // Update state
-        this.videoElement = video;
+        this._videoNode = video;
 
         // Bind player events
-        this._addEventListener('playing', () => this.emit('playing'));
+        this._addEventListener('playing', () => this.emit('started'));
         this._addEventListener('pause', () => this.emit('paused'));
-        this._addEventListener('ended', () => this.emit('ended'));
+        this._addEventListener('ended', () => this.emit('stopped'));
 
         this._addEventListener('timeupdate', () => {
-            let time = this._getPlayerTime();
-            let duration = this._getPlayerDuration();
-
-            this.emit(
-                'progress',
-                this._calculateProgress(time, duration),
-                time,
-                duration
-            );
+            this.emit('progress', this._getPlayerTime(), this._getPlayerDuration());
         });
     }
 
     _unbind() {
-        console.debug('Unbinding from video element: %o', this.videoElement);
+        Log.debug('Unbinding from video element: %o', this._videoNode);
 
         // Unbind player events
-        if(this.videoElement !== null) {
+        if(this._videoNode !== null) {
             this._removeEventListeners();
         }
 
         // Reset state
-        this.videoElement = null;
+        this._videoNode = null;
     }
 
     // endregion
@@ -192,47 +186,52 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _onVideoLoaded() {
+        let identifier = this._getIdentifier();
+
+        if(!isDefined(identifier)) {
+            Log.warn('Unable to retrieve video identifier');
+            return;
+        }
+
+        if(identifier.matches(this._currentIdentifier)) {
+            return;
+        }
+
+        // Emit "opened" event
+        this.emit('opened', identifier);
+
+        // Update state
+        this._currentIdentifier = identifier;
+    }
+
+    _getIdentifier() {
         let path = location.pathname;
 
         // Retrieve video key
         let videoId = path.substring(path.lastIndexOf('/') + 1);
 
         if(!videoId || videoId.length < 1) {
-            return;
-        }
-
-        // Emit "open" event
-        if(videoId !== this.videoId) {
-            this.videoId = videoId;
-
-            // Emit event
-            this.emit('open', parseInt(videoId, 10));
-        }
-    }
-
-    // endregion
-
-    // region Helpers
-
-    _getPlayerDuration() {
-        if(this.videoElement === null || this.videoElement.duration === 0) {
             return null;
         }
 
-        return this.videoElement.duration * 1000;
+        return new Identifier(
+            KeyType.Unknown, parseInt(videoId, 10)
+        );
+    }
+
+    _getPlayerDuration() {
+        if(this._videoNode === null || this._videoNode.duration === 0) {
+            return null;
+        }
+
+        return this._videoNode.duration * 1000;
     }
 
     _getPlayerTime() {
-        if(this.videoElement === null || this.videoElement.duration === 0) {
+        if(this._videoNode === null || this._videoNode.duration === 0) {
             return null;
         }
 
-        return this.videoElement.currentTime * 1000;
+        return this._videoNode.currentTime * 1000;
     }
-
-    _calculateProgress(time, duration) {
-        return round((parseFloat(time) / duration) * 100, 2);
-    }
-
-    // endregion
 }
