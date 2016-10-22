@@ -48,7 +48,7 @@ export default class Parser {
         }
 
         if(!match) {
-            Log.warn('Unable to find metadata for episode "' + id + '"');
+            Log.warn('Unable to find metadata for episode %o', show.currentEpisode);
             return null;
         }
 
