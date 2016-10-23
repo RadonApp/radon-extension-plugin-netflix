@@ -1,5 +1,5 @@
 import {isDefined} from 'eon.extension.framework/core/helpers';
-import {Identifier, KeyType} from 'eon.extension.framework/models/activity/identifier';
+import {Identifier, KeyType} from 'eon.extension.framework/models/identifier';
 
 import EventEmitter from 'eventemitter3';
 
