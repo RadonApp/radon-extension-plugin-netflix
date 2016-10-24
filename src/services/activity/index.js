@@ -5,12 +5,12 @@ import Registry from 'eon.extension.framework/core/registry';
 import {isDefined} from 'eon.extension.framework/core/helpers';
 import {createScript} from 'eon.extension.framework/core/helpers/script';
 
-import MetadataApi from '../../api/metadata';
-import Log from '../../core/logger';
+import Log from 'eon.extension.source.netflix/core/logger';
+import MetadataApi from 'eon.extension.source.netflix/api/metadata';
+import Plugin from 'eon.extension.source.netflix/core/plugin';
+import ShimApi from 'eon.extension.source.netflix/api/shim';
 import Parser from './core/parser';
-import Plugin from '../../core/plugin';
-import ShimApi from '../../api/shim';
-import Monitor from './monitor';
+import PlayerMonitor from './player/monitor';
 
 
 export class NetflixActivityService extends ActivityService {
@@ -47,11 +47,10 @@ export class NetflixActivityService extends ActivityService {
         }
 
         // Initialize activity monitor
-        this.monitor = new Monitor(this);
-        this.monitor.initialize();
+        this.monitor = new PlayerMonitor();
 
         // Bind activity engine to monitor
-        this.engine.bind(this.monitor.player);
+        this.engine.bind(this.monitor);
 
         // Inject shim
         this._inject()

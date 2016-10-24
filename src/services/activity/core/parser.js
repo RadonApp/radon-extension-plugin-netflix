@@ -1,7 +1,7 @@
 import {Movie, Show, Season, Episode} from 'eon.extension.framework/models/video';
 
-import Log from '../../../core/logger';
-import Plugin from '../../../core/plugin';
+import Log from 'eon.extension.source.netflix/core/logger';
+import Plugin from 'eon.extension.source.netflix/core/plugin';
 
 
 export default class Parser {

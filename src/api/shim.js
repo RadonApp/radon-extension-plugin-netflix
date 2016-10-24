@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
-import Log from '../core/logger';
+import Log from 'eon.extension.source.netflix/core/logger';
 
 
 class NetflixShimApi extends EventEmitter {
