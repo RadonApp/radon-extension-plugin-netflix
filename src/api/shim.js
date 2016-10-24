@@ -3,7 +3,7 @@ import EventEmitter from 'eventemitter3';
 import Log from 'eon.extension.source.netflix/core/logger';
 
 
-class NetflixShimApi extends EventEmitter {
+class Shim extends EventEmitter {
     constructor() {
         super();
 
@@ -59,4 +59,4 @@ class NetflixShimApi extends EventEmitter {
     }
 }
 
-export default new NetflixShimApi();
+export default new Shim();

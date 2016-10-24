@@ -5,10 +5,10 @@ import Registry from 'eon.extension.framework/core/registry';
 import {isDefined} from 'eon.extension.framework/core/helpers';
 import {createScript} from 'eon.extension.framework/core/helpers/script';
 
+import Api from 'eon.extension.source.netflix/api';
 import Log from 'eon.extension.source.netflix/core/logger';
-import MetadataApi from 'eon.extension.source.netflix/api/metadata';
 import Plugin from 'eon.extension.source.netflix/core/plugin';
-import ShimApi from 'eon.extension.source.netflix/api/shim';
+import Shim from 'eon.extension.source.netflix/api/shim';
 import Parser from './core/parser';
 import PlayerMonitor from './player/monitor';
 
@@ -65,10 +65,10 @@ export class NetflixActivityService extends ActivityService {
             let script = createScript(document, Extension.getUrl('/source/netflix/shim/shim.js'));
 
             // Bind shim api to page
-            ShimApi.bind(document);
+            Shim.bind(document);
 
             // Wait for "ready" event
-            ShimApi.once('ready', () => {
+            Shim.once('ready', () => {
                 resolve();
             });
 
@@ -83,7 +83,7 @@ export class NetflixActivityService extends ActivityService {
         Log.debug('Fetching metadata for %o', identifier);
 
         // Retrieve metadata for `identifier`
-        return MetadataApi.get(identifier.key).then((item) => {
+        return Api.metadata.get(identifier.key).then((item) => {
             Log.trace('Received item: %o', item);
 
             // Parse item into metadata models
