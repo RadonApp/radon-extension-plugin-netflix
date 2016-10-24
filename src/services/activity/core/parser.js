@@ -1,29 +1,30 @@
-import {Movie, Show, Season, Episode} from 'eon.extension.framework/models/metadata/video';
+import {Movie, Show, Season, Episode} from 'eon.extension.framework/models/video';
 
-import Plugin from '../../../core/plugin';
+import Log from 'eon.extension.source.netflix/core/logger';
+import Plugin from 'eon.extension.source.netflix/core/plugin';
 
 
 export default class Parser {
     // region Public methods
 
-    static parse(id, metadata) {
+    static parse(metadata) {
         let item = metadata.video;
 
         if(item.type === 'movie') {
-            return Parser.parseMovie(id, item);
+            return Parser.parseMovie(item);
         } else if(item.type === 'show') {
-            return Parser.parseEpisodeFromShow(id, item);
+            return Parser.parseEpisodeFromShow(item);
         }
 
-        console.warn('Unknown metadata type: "' + item.type + '"');
+        Log.warn('Unknown metadata type: "' + item.type + '"');
         return null;
     }
 
-    static parseMovie(id, movie) {
-        return Parser._constructMovie(id, movie);
+    static parseMovie(movie) {
+        return Parser._constructMovie(movie);
     }
 
-    static parseEpisodeFromShow(id, show) {
+    static parseEpisodeFromShow(show) {
         let season, episode;
         let match = false;
 
@@ -35,7 +36,7 @@ export default class Parser {
             for(let j = 0; j < season.episodes.length; ++j) {
                 episode = season.episodes[j];
 
-                if(episode.id === id) {
+                if(episode.id === show.currentEpisode) {
                     match = true;
                     break;
                 }
@@ -47,13 +48,12 @@ export default class Parser {
         }
 
         if(!match) {
-            console.warn('Unable to find metadata for episode "' + id + '"');
+            Log.warn('Unable to find metadata for episode %o', show.currentEpisode);
             return null;
         }
 
         // Construct metadata
         return Parser._constructEpisode(
-            id,
             episode,
             season,
             show
@@ -64,10 +64,10 @@ export default class Parser {
 
     // region Private methods
 
-    static _constructMovie(id, movie) {
+    static _constructMovie(movie) {
         return new Movie(
             Plugin,
-            id,
+            movie.id,
             movie.title,
             movie.year,
             movie.runtime * 1000
@@ -94,10 +94,10 @@ export default class Parser {
         );
     }
 
-    static _constructEpisode(id, episode, season, show) {
+    static _constructEpisode(episode, season, show) {
         return new Episode(
             Plugin,
-            id,
+            episode.id,
             episode.title,
             episode.seq,
             episode.runtime * 1000,

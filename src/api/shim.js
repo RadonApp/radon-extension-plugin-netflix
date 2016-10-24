@@ -1,5 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
+import Log from 'eon.extension.source.netflix/core/logger';
+
 
 class NetflixShimApi extends EventEmitter {
     constructor() {
@@ -19,10 +21,10 @@ class NetflixShimApi extends EventEmitter {
 
     request(type, data) {
         return new Promise((resolve, reject) => {
-            var requestId = this._nextRequestId++;
+            let requestId = this._nextRequestId++;
 
             // Construct request
-            var event = new CustomEvent('eon.request', {
+            let event = new CustomEvent('eon.request', {
                 detail: {
                     id: requestId,
                     type: type,
@@ -46,11 +48,11 @@ class NetflixShimApi extends EventEmitter {
 
     _onEventReceived(e) {
         if(!e || !e.detail || !e.detail.type) {
-            console.error('Unknown event received:', e);
+            Log.error('Unknown event received:', e);
             return;
         }
 
-        console.debug('Received "' + e.detail.type + '" event:', e.detail.data);
+        Log.debug('Received "' + e.detail.type + '" event:', e.detail.data);
 
         // Emit event
         this.emit(e.detail.type, e.detail.data || null);
