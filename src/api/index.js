@@ -27,13 +27,14 @@ export class Api {
                 }, options.query || {});
 
                 // Build URL
-                let url = new URI(BaseUrl + path + serverDefs.endpointIdentifiers['/metadata'])
+                let url = new URI(BaseUrl + path + '/' + serverDefs.endpointIdentifiers['/metadata'])
                     .search(options.query)
                     .toString();
 
                 // Send request
                 return fetch(url, {
-                    method: method
+                    method: method,
+                    credentials: 'include'
                 });
             })
             .then((response) => {
