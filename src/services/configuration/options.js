@@ -14,14 +14,17 @@ export default [
         new EnableOption(Plugin, 'enabled', 'Enabled', {
             default: false,
 
-            contentScripts: Plugin.contentScripts,
-            permissions: Plugin.permissions
+            type: 'plugin',
+            permissions: true,
+            contentScripts: true
         }),
 
         new Group(Plugin, 'activity', 'Activity', [
-            new EnableOption(Plugin, 'activity.enabled', 'Enabled', {
+            new EnableOption(Plugin, 'activity:enabled', 'Enabled', {
                 default: true,
-                requires: ['enabled']
+                requires: ['enabled'],
+
+                type: 'service'
             }),
 
             new CheckboxOption(Plugin, 'activity.movies', 'Movies', {
@@ -36,9 +39,11 @@ export default [
         ]),
 
         new Group(Plugin, 'sync', 'Sync', [
-            new EnableOption(Plugin, 'sync.enabled', 'Enabled', {
+            new EnableOption(Plugin, 'sync:enabled', 'Enabled', {
                 default: true,
-                requires: ['enabled']
+                requires: ['enabled'],
+
+                type: 'service'
             }),
 
             new CheckboxOption(Plugin, 'sync.history', 'Watched history', {
