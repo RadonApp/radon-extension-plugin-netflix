@@ -5,8 +5,6 @@ import Plugin from 'eon.extension.source.netflix/core/plugin';
 
 
 export default class Parser {
-    // region Public methods
-
     static parse(metadata) {
         let item = metadata.video;
 
@@ -20,8 +18,12 @@ export default class Parser {
         return null;
     }
 
-    static parseMovie(movie) {
-        return Parser._constructMovie(movie);
+    static parseMovie(movieInfo) {
+        return Movie.create(Plugin, movieInfo.id, {
+            title: movieInfo.title,
+            year: movieInfo.year,
+            duration: movieInfo.runtime * 1000
+        });
     }
 
     static parseEpisodeFromShow(show) {
@@ -53,59 +55,32 @@ export default class Parser {
         }
 
         // Construct metadata
-        return Parser._constructEpisode(
-            episode,
-            season,
-            show
-        );
+        return Parser.parseEpisode(show, season, episode);
     }
 
-    // endregion
+    static parseEpisode(showInfo, seasonInfo, episodeInfo) {
+        // Construct show
+        let show = Show.create(Plugin, showInfo.id, {
+            title: showInfo.title
+        });
 
-    // region Private methods
+        // Construct season
+        let season = Season.create(Plugin, seasonInfo.id, {
+            title: seasonInfo.title,
+            year: seasonInfo.year,
+            number: seasonInfo.seq,
 
-    static _constructMovie(movie) {
-        return new Movie(
-            Plugin,
-            movie.id,
-            movie.title,
-            movie.year,
-            movie.runtime * 1000
-        );
+            show: show
+        });
+
+        // Construct episode
+        return Episode.create(Plugin, episodeInfo.id, {
+            title: episodeInfo.title,
+            number: episodeInfo.seq,
+            duration: episodeInfo.runtime * 1000,
+
+            show: show,
+            season: season
+        });
     }
-
-    static _constructShow(show) {
-        return new Show(
-            Plugin,
-            show.id,
-            show.title
-        );
-    }
-
-    static _constructSeason(season, show) {
-        return new Season(
-            Plugin,
-            season.id,
-            season.title,
-            season.year,
-            season.seq,
-
-            Parser._constructShow(show)
-        );
-    }
-
-    static _constructEpisode(episode, season, show) {
-        return new Episode(
-            Plugin,
-            episode.id,
-            episode.title,
-            episode.seq,
-            episode.runtime * 1000,
-
-            Parser._constructShow(show),
-            Parser._constructSeason(season, show)
-        );
-    }
-
-    // endregion
 }
