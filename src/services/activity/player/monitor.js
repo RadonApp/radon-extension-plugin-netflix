@@ -22,7 +22,7 @@ export default class PlayerMonitor extends EventEmitter {
         this.player = new PlayerObserver();
         this.player.on('opened',    this._onOpened.bind(this));
         this.player.on('closed',    this._onClosed.bind(this));
-        this.player.on('loading',   this._onLoading.bind(this));
+        this.player.on('loaded',    this._onLoaded.bind(this));
 
         this.player.on('started',   this._onStarted.bind(this));
 
@@ -72,7 +72,7 @@ export default class PlayerMonitor extends EventEmitter {
         return true;
     }
 
-    _onLoading() {
+    _onLoaded() {
         // Update current identifier
         return this._updateIdentifier()
             .then((changed) => {
@@ -80,6 +80,8 @@ export default class PlayerMonitor extends EventEmitter {
                 if(changed) {
                     Log.trace('Identifier changed, emitting "created" event (identifier: %o)', this._currentIdentifier);
                     this.emit('created', this._currentIdentifier);
+                } else {
+                    this.emit('loaded', this._currentIdentifier);
                 }
 
                 return true;
