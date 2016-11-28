@@ -113,10 +113,12 @@ export default class PlayerObserver extends EventEmitter {
         this._video = video;
 
         // Bind player events
-        this._addEventListener('loadstart', () => this.emit('loading'));
-        this._addEventListener('playing',   () => this.emit('started'));
-        this._addEventListener('pause',     () => this.emit('paused'));
-        this._addEventListener('ended',     () => this.emit('stopped'));
+        this._addEventListener('loadstart',         () => this.emit('loading'));
+        this._addEventListener('loadedmetadata',    () => this.emit('loaded'));
+
+        this._addEventListener('playing',           () => this.emit('started'));
+        this._addEventListener('pause',             () => this.emit('paused'));
+        this._addEventListener('ended',             () => this.emit('stopped'));
 
         this._addEventListener('seeked', () => {
             this.emit('seeked', this.getTime(), this.getDuration());
