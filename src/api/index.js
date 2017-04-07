@@ -27,7 +27,7 @@ export class Api {
                 }, options.query || {});
 
                 // Build URL
-                let url = new URI(BaseUrl + path + '/' + serverDefs.endpointIdentifiers['/metadata'])
+                let url = new URI(BaseUrl + '/' + serverDefs['BUILD_IDENTIFIER'] + path)
                     .search(options.query)
                     .toString();
 
