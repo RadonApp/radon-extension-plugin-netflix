@@ -57,8 +57,8 @@ export default [
             })
         ]),
 
-        new Group(Plugin, 'developer', 'Developer', [
-            new SelectOption(Plugin, 'developer.log_level', 'Log Level', [
+        new Group(Plugin, 'debugging', 'Debugging', [
+            new SelectOption(Plugin, 'debugging.log_level', 'Log Level', [
                 {key: 'error', label: 'Error'},
                 {key: 'warning', label: 'Warning'},
                 {key: 'notice', label: 'Notice'},
