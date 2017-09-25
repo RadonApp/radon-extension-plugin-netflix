@@ -4,9 +4,9 @@ import {
     CheckboxOption,
     EnableOption,
     SelectOption
-} from 'eon.extension.framework/services/configuration/models';
+} from 'neon-extension-framework/services/configuration/models';
 
-import Plugin from 'eon.extension.source.netflix/core/plugin';
+import Plugin from 'neon-extension-source-netflix/core/plugin';
 
 
 export default [

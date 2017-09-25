@@ -1,5 +1,5 @@
 {
-  "name": "eon.extension.source.netflix",
+  "name": "neon-extension-source-netflix",
   "version": "0.3.3",
   "main": "./src/index.js",
   "devDependencies": {

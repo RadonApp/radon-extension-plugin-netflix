@@ -1,9 +1,9 @@
 /* eslint-disable no-multi-spaces, key-spacing */
-import {isDefined} from 'eon.extension.framework/core/helpers';
+import {isDefined} from 'neon-extension-framework/core/helpers';
 
 import EventEmitter from 'eventemitter3';
 
-import Log from 'eon.extension.source.netflix/core/logger';
+import Log from 'neon-extension-source-netflix/core/logger';
 
 
 export default class PlayerObserver extends EventEmitter {

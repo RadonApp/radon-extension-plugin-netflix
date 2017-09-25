@@ -1,7 +1,7 @@
-import SyncService from 'eon.extension.framework/services/source/sync';
-import Registry from 'eon.extension.framework/core/registry';
+import SyncService from 'neon-extension-framework/services/source/sync';
+import Registry from 'neon-extension-framework/core/registry';
 
-import Plugin from 'eon.extension.source.netflix/core/plugin';
+import Plugin from 'neon-extension-source-netflix/core/plugin';
 
 
 export class NetflixSyncService extends SyncService {

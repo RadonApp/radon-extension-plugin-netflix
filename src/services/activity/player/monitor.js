@@ -1,10 +1,10 @@
 /* eslint-disable no-multi-spaces, key-spacing */
-import {isDefined} from 'eon.extension.framework/core/helpers';
-import Identifier, {KeyType} from 'eon.extension.framework/models/identifier';
+import {isDefined} from 'neon-extension-framework/core/helpers';
+import Identifier, {KeyType} from 'neon-extension-framework/models/identifier';
 
 import EventEmitter from 'eventemitter3';
 
-import Log from 'eon.extension.source.netflix/core/logger';
+import Log from 'neon-extension-source-netflix/core/logger';
 import ApplicationObserver from '../application/observer';
 import PlayerObserver from './observer';
 

@@ -4,7 +4,7 @@
 export class NetflixShim {
     start() {
         // Listen for shim requests
-        document.body.addEventListener('eon.request', (e) => this._onRequestReceived(e));
+        document.body.addEventListener('neon.request', (e) => this._onRequestReceived(e));
 
         // Emit "ready" event
         this.emit('ready');
@@ -12,7 +12,7 @@ export class NetflixShim {
 
     emit(type, data) {
         // Construct event
-        let event = new CustomEvent('eon.event', {
+        let event = new CustomEvent('neon.event', {
             detail: {
                 type: type,
                 data: data || null
