@@ -1,6 +1,6 @@
 {
-  "name": "Netflix",
-  "version": "0.3.3",
+  "title": "Netflix",
+
   "content_scripts": [
     {
       "id": "source.netflix/main",
@@ -25,7 +25,18 @@
       ]
     }
   ],
+  "services": [
+    "configuration",
+
+    "source/activity",
+    "source/sync"
+  ],
   "web_accessible_resources": [
     "source/netflix/shim/shim.js"
-  ]
+  ],
+  "webpack": {
+    "chunks": [
+      "shim"
+    ]
+  }
 }
