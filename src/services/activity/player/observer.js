@@ -1,7 +1,6 @@
 /* eslint-disable no-multi-spaces, key-spacing */
-import {isDefined} from 'neon-extension-framework/core/helpers';
-
 import EventEmitter from 'eventemitter3';
+import IsNil from 'lodash-es/isNil';
 
 import Log from 'neon-extension-source-netflix/core/logger';
 
@@ -35,7 +34,7 @@ export default class PlayerObserver extends EventEmitter {
         Log.debug('Disposing player monitor');
 
         // Disconnect mutation observer
-        if(isDefined(this._observer)) {
+        if(!IsNil(this._observer)) {
             this._observer.disconnect();
             this._observer = null;
         }

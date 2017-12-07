@@ -1,8 +1,8 @@
 /* eslint-disable no-multi-spaces, key-spacing */
-import {isDefined} from 'neon-extension-framework/core/helpers';
-import Identifier, {KeyType} from 'neon-extension-framework/models/identifier';
-
 import EventEmitter from 'eventemitter3';
+import IsNil from 'lodash-es/isNil';
+
+import Identifier, {KeyType} from 'neon-extension-framework/models/identifier';
 
 import Log from 'neon-extension-source-netflix/core/logger';
 import ApplicationObserver from '../application/observer';
@@ -148,7 +148,7 @@ export default class PlayerMonitor extends EventEmitter {
             let get = () => {
                 let node = document.querySelector('#appMountPoint');
 
-                if(!isDefined(node)) {
+                if(IsNil(node)) {
                     Log.info('Unable to find the "#appMountPoint" element, will try again in 500ms');
 
                     if(retries < 10) {
@@ -177,7 +177,7 @@ export default class PlayerMonitor extends EventEmitter {
                     return false;
                 }
 
-                if(isDefined(identifier) && identifier.matches(this._currentIdentifier)) {
+                if(!IsNil(identifier) && identifier.matches(this._currentIdentifier)) {
                     return false;
                 }
 
