@@ -28,8 +28,7 @@
   "services": [
     "configuration",
 
-    "source/activity",
-    "source/sync"
+    "source/activity"
   ],
   "web_accessible_resources": [
     "source/netflix/shim/shim.js"
