@@ -2,7 +2,7 @@
 import EventEmitter from 'eventemitter3';
 import IsNil from 'lodash-es/isNil';
 
-import Log from 'neon-extension-source-netflix/core/logger';
+import Log from '../../../core/logger';
 
 
 export default class PlayerObserver extends EventEmitter {

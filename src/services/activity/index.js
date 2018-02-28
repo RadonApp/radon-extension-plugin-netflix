@@ -1,16 +1,14 @@
 import IsNil from 'lodash-es/isNil';
-import Uuid from 'uuid';
 
 import Extension from 'neon-extension-browser/extension';
 import ActivityService, {ActivityEngine} from 'neon-extension-framework/services/source/activity';
-import MessagingBus from 'neon-extension-framework/messaging/bus';
 import Registry from 'neon-extension-framework/core/registry';
 import {createScript} from 'neon-extension-framework/core/helpers/script';
 
-import Api from 'neon-extension-source-netflix/api';
-import Log from 'neon-extension-source-netflix/core/logger';
-import Plugin from 'neon-extension-source-netflix/core/plugin';
-import Shim from 'neon-extension-source-netflix/api/shim';
+import Api from '../../api';
+import Log from '../../core/logger';
+import Plugin from '../../core/plugin';
+import Shim from '../../api/shim';
 import Parser from './core/parser';
 import PlayerMonitor from './player/monitor';
 
@@ -19,7 +17,6 @@ export class NetflixActivityService extends ActivityService {
     constructor() {
         super(Plugin);
 
-        this.bus = null;
         this.engine = null;
         this.monitor = null;
     }
@@ -27,12 +24,8 @@ export class NetflixActivityService extends ActivityService {
     initialize() {
         super.initialize();
 
-        // Construct messaging bus
-        this.bus = new MessagingBus(Plugin.id + ':activity:' + Uuid.v4());
-        this.bus.connect('neon-extension-core:scrobble');
-
         // Construct activity engine
-        this.engine = new ActivityEngine(this.plugin, this.bus, {
+        this.engine = new ActivityEngine(this.plugin, {
             getDuration: this._getDuration.bind(this),
             getMetadata: this._getMetadata.bind(this),
 

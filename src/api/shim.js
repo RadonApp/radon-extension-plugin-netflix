@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
-import Log from 'neon-extension-source-netflix/core/logger';
+import Log from '../core/logger';
 
 
 class Shim extends EventEmitter {

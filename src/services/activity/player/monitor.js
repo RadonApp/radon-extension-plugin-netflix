@@ -2,9 +2,9 @@
 import EventEmitter from 'eventemitter3';
 import IsNil from 'lodash-es/isNil';
 
-import Identifier, {KeyType} from 'neon-extension-framework/models/identifier';
+// import {Movie, Show, Season, Episode} from 'neon-extension-framework/models/item/video';
 
-import Log from 'neon-extension-source-netflix/core/logger';
+import Log from '../../../core/logger';
 import ApplicationObserver from '../application/observer';
 import PlayerObserver from './observer';
 
@@ -32,7 +32,7 @@ export default class PlayerMonitor extends EventEmitter {
         this.player.on('stopped',   this.emit.bind(this, 'stopped'));
 
         // Private attributes
-        this._currentIdentifier = null;
+        this._currentItem = null;
         this._currentMountPoint = null;
     }
 
@@ -56,50 +56,48 @@ export default class PlayerMonitor extends EventEmitter {
 
     _onOpened() {
         // Update current identifier
-        return this._getIdentifier()
-            .then((identifier) => {
-                // Emit "opened" event
-                this.emit('opened', identifier);
-                return true;
-            }, (err) => {
-                Log.warn('Unable to retrieve identifier, error:', err);
-            });
+        return this._getItem().then((item) => {
+            // Emit "opened" event
+            this.emit('opened', item);
+            return true;
+        }, (err) => {
+            Log.warn('Unable to retrieve identifier, error:', err);
+        });
     }
 
     _onClosed() {
         // Emit "closed" event
-        this.emit('closed', this._currentIdentifier);
+        this.emit('closed', this._currentItem);
         return true;
     }
 
     _onLoaded() {
         // Update current identifier
-        return this._updateIdentifier()
-            .then((changed) => {
-                // Emit "created" event (if the identifier has changed)
-                if(changed) {
-                    Log.trace('Identifier changed, emitting "created" event (identifier: %o)', this._currentIdentifier);
-                    this.emit('created', this._currentIdentifier);
-                } else {
-                    this.emit('loaded', this._currentIdentifier);
-                }
+        return this._updateItem().then((changed) => {
+            // Emit "created" event (if the identifier has changed)
+            if(changed) {
+                Log.trace('Identifier changed, emitting "created" event (identifier: %o)', this._currentItem);
+                this.emit('created', this._currentItem);
+            } else {
+                this.emit('loaded', this._currentItem);
+            }
 
-                return true;
-            }, (err) => {
-                Log.warn('Unable to update identifier, error:', err);
-            });
+            return true;
+        }, (err) => {
+            Log.warn('Unable to update identifier, error:', err);
+        });
     }
 
     _onStarted() {
         Log.trace('Started');
 
         // Update current identifier
-        return this._updateIdentifier()
+        return this._updateItem()
             .then((changed) => {
                 // Emit event
                 if(changed) {
-                    Log.trace('Identifier changed, emitting "created" event (identifier: %o)', this._currentIdentifier);
-                    this.emit('created', this._currentIdentifier);
+                    Log.trace('Identifier changed, emitting "created" event (identifier: %o)', this._currentItem);
+                    this.emit('created', this._currentItem);
                 } else {
                     this.emit('started');
                 }
@@ -126,19 +124,12 @@ export default class PlayerMonitor extends EventEmitter {
 
     // region Private methods
 
-    _getIdentifier() {
-        let path = location.pathname;
+    _getItem() {
+        throw new Error('TODO: Implement PlayerMonitor._getItem()');
+    }
 
-        // Retrieve video key
-        let videoId = path.substring(path.lastIndexOf('/') + 1);
-
-        if(!videoId || videoId.length < 1) {
-            return null;
-        }
-
-        return Promise.resolve(new Identifier(
-            KeyType.Unknown, parseInt(videoId, 10)
-        ));
+    _createItem() {
+        throw new Error('TODO: Implement PlayerMonitor._createItem()');
     }
 
     _getMountPoint(document) {
@@ -169,22 +160,21 @@ export default class PlayerMonitor extends EventEmitter {
         });
     }
 
-    _updateIdentifier() {
-        return this._getIdentifier()
-            .then((identifier) => {
-                // Determine if content has changed
-                if(identifier === this._currentIdentifier) {
-                    return false;
-                }
+    _updateItem() {
+        return this._getItem().then((item) => {
+            // Determine if content has changed
+            if(item === this._currentItem) {
+                return false;
+            }
 
-                if(!IsNil(identifier) && identifier.matches(this._currentIdentifier)) {
-                    return false;
-                }
+            if(!IsNil(item) && item.matches(this._currentItem)) {
+                return false;
+            }
 
-                // Update state
-                this._currentIdentifier = identifier;
-                return true;
-            });
+            // Update state
+            this._currentItem = item;
+            return true;
+        });
     }
 
     // endregion

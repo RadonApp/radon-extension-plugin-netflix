@@ -1,7 +1,7 @@
-import {Movie, Show, Season, Episode} from 'neon-extension-framework/models/video';
+import {Movie, Show, Season, Episode} from 'neon-extension-framework/models/item/video';
 
-import Log from 'neon-extension-source-netflix/core/logger';
-import Plugin from 'neon-extension-source-netflix/core/plugin';
+import Log from '../../../core/logger';
+import Plugin from '../../../core/plugin';
 
 
 export default class Parser {
@@ -19,7 +19,12 @@ export default class Parser {
     }
 
     static parseMovie(movieInfo) {
-        return Movie.create(Plugin, movieInfo.id, {
+        return Movie.create(Plugin.id, {
+            keys: Parser._createKeys({
+                id: movieInfo.id
+            }),
+
+            // Metadata
             title: movieInfo.title,
             year: movieInfo.year,
             duration: movieInfo.runtime * 1000
@@ -60,27 +65,54 @@ export default class Parser {
 
     static parseEpisode(showInfo, seasonInfo, episodeInfo) {
         // Construct show
-        let show = Show.create(Plugin, showInfo.id, {
+        let show = Show.create(Plugin.id, {
+            keys: Parser._createKeys({
+                id: showInfo.id
+            }),
+
+            // Metadata
             title: showInfo.title
+            // TODO year?
         });
 
         // Construct season
-        let season = Season.create(Plugin, seasonInfo.id, {
+        let season = Season.create(Plugin.id, {
+            keys: Parser._createKeys({
+                id: seasonInfo.id
+            }),
+
+            // Metadata
             title: seasonInfo.title,
             year: seasonInfo.year,
             number: seasonInfo.seq,
 
-            show: show
+            // Children
+            show
         });
 
         // Construct episode
-        return Episode.create(Plugin, episodeInfo.id, {
+        return Episode.create(Plugin.id, {
+            keys: Parser._createKeys({
+                id: episodeInfo.id
+            }),
+
+            // Metadata
             title: episodeInfo.title,
             number: episodeInfo.seq,
             duration: episodeInfo.runtime * 1000,
 
-            show: show,
-            season: season
+            // Children
+            show,
+            season
         });
     }
+
+    // region Private Methods
+
+    static _createKeys(keys) {
+        // TODO Add `keys` with country suffixes
+        return keys;
+    }
+
+    // endreigon
 }

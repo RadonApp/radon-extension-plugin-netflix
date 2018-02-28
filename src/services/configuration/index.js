@@ -1,7 +1,7 @@
 import ConfigurationService from 'neon-extension-framework/services/configuration';
 import Registry from 'neon-extension-framework/core/registry';
 
-import Plugin from 'neon-extension-source-netflix/core/plugin';
+import Plugin from '../../core/plugin';
 import Options from './options';
 
 
