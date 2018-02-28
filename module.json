@@ -3,7 +3,7 @@
 
   "content_scripts": [
     {
-      "id": "source.netflix/main",
+      "id": "main",
       "conditions": [
         {
           "pattern": "*://netflix.com/*",
@@ -19,8 +19,8 @@
         }
       ],
       "js": [
-        "vendor.js",
-        "shared.js",
+        "common.js",
+        "source/common.js",
         "source/netflix/netflix.js"
       ]
     }
@@ -30,11 +30,16 @@
 
     "source/activity"
   ],
+  "origins": [
+    "*://netflix.com/*",
+    "*://www.netflix.com/*"
+  ],
   "web_accessible_resources": [
     "source/netflix/shim/shim.js"
   ],
+
   "webpack": {
-    "chunks": [
+    "modules": [
       "shim"
     ]
   }
