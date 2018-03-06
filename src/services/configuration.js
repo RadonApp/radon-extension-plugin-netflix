@@ -1,3 +1,5 @@
+import ConfigurationService from 'neon-extension-framework/services/configuration';
+import Registry from 'neon-extension-framework/core/registry';
 import {
     Group,
     Page,
@@ -5,11 +7,11 @@ import {
     SelectOption
 } from 'neon-extension-framework/services/configuration/models';
 
-import Plugin from '../../core/plugin';
+import Plugin from '../core/plugin';
 
 
-export default [
-    new Page(Plugin, null, Plugin.title, [
+export const Options = [
+    new Page(Plugin, null, Plugin.info, [
         new EnableOption(Plugin, 'enabled', 'Enabled', {
             default: false,
 
@@ -70,3 +72,12 @@ export default [
         ])
     ])
 ];
+
+export class NetflixConfigurationService extends ConfigurationService {
+    constructor() {
+        super(Plugin, Options);
+    }
+}
+
+// Register service
+Registry.registerService(new NetflixConfigurationService());

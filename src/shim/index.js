@@ -1,64 +1,91 @@
 /* eslint-disable no-console, no-new */
 /* global netflix */
+import EventEmitter from 'eventemitter3';
+import IsNil from 'lodash-es/isNil';
 
 
-export class NetflixShim {
-    start() {
-        // Listen for shim requests
-        document.body.addEventListener('neon.request', (e) => this._onRequestReceived(e));
+export class ShimRequests extends EventEmitter {
+    constructor() {
+        super();
 
-        // Emit "ready" event
-        this.emit('ready');
+        // Ensure body exists
+        if(IsNil(document.body)) {
+            throw new Error('Body is not available');
+        }
+
+        // Bind to events
+        this._bind('neon.request', (e) => this._onRequest(e));
     }
 
-    emit(type, data) {
+    _bind(event, callback) {
+        try {
+            document.body.addEventListener(event, callback);
+        } catch(e) {
+            console.error('Unable to bind to "%s"', event, e);
+            return false;
+        }
+
+        console.debug('Bound to "%s"', event);
+        return true;
+    }
+
+    _onRequest(e) {
+        if(!e || !e.detail) {
+            console.error('Invalid request received:', e);
+            return;
+        }
+
+        // Decode request
+        let request;
+
+        try {
+            request = JSON.parse(e.detail);
+        } catch(err) {
+            console.error('Unable to decode request: %s', err && err.message, err);
+            return;
+        }
+
+        // Emit request
+        this.emit(request.type, ...request.args);
+    }
+}
+
+export class Shim {
+    constructor() {
+        this.requests = new ShimRequests();
+        this.requests.on('configuration', () => this.configuration());
+
+        // Emit "configuration" event
+        this.configuration();
+    }
+
+    configuration() {
+        let models = netflix.reactContext.models;
+
+        // Emit "configuration" event
+        this._emit('configuration', {
+            serverDefs: models.serverDefs.data,
+            userInfo: models.userInfo.data
+        });
+    }
+
+    // region Private Methods
+
+    _emit(type, ...args) {
         // Construct event
         let event = new CustomEvent('neon.event', {
-            detail: {
+            detail: JSON.stringify({
                 type: type,
-                data: data || null
-            }
+                args: args || []
+            })
         });
 
         // Emit event on the document
         document.body.dispatchEvent(event);
     }
 
-    respond(requestId, type, data) {
-        this.emit('#' + requestId, {
-            type: type,
-            data: data || null
-        });
-    }
-
-    resolve(requestId, data) {
-        this.respond(requestId, 'resolve', data);
-    }
-
-    reject(requestId, data) {
-        this.respond(requestId, 'reject', data);
-    }
-
-    _onRequestReceived(e) {
-        if(!e || !e.detail || !e.detail.id || !e.detail.type) {
-            console.error('Unknown event received:', e);
-            return;
-        }
-
-        let id = e.detail.id;
-        let type = e.detail.type;
-
-        // Process request
-        if(type === 'serverDefs') {
-            this.resolve(id, netflix.reactContext.models.serverDefs.data);
-            return;
-        }
-
-        // Unknown request
-        console.warn('Received unknown "' + type + '" request');
-        this.reject(id);
-    }
+    // endregion
 }
 
-// Initialize shim
-(new NetflixShim()).start();
+// Construct shim
+(new Shim());

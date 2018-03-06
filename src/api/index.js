@@ -18,33 +18,31 @@ export class Api {
             query: {}
         }, options || {});
 
-        // Retrieve server definitions via shim
-        return Shim.request('serverDefs')
-            .then(function(serverDefs) {
-                // Add default parameters
-                options.query = merge({
-                    _: Date.now()
-                }, options.query || {});
+        // Retrieve configuration
+        return Shim.configuration().then(function({ serverDefs }) {
+            // Add default parameters
+            options.query = merge({
+                _: Date.now()
+            }, options.query || {});
 
-                // Build URL
-                let url = new URI(BaseUrl + '/' + serverDefs['BUILD_IDENTIFIER'] + path)
-                    .search(options.query)
-                    .toString();
+            // Build URL
+            let url = new URI(BaseUrl + '/' + serverDefs['BUILD_IDENTIFIER'] + path)
+                .search(options.query)
+                .toString();
 
-                // Send request
-                return fetch(url, {
-                    method: method,
-                    credentials: 'include'
-                });
-            })
-            .then((response) => {
-                if(!response.ok) {
-                    return Promise.reject(new Error('Request failed'));
-                }
-
-                // TODO Verify content-type
-                return response.json();
+            // Send request
+            return fetch(url, {
+                method: method,
+                credentials: 'include'
             });
+        }).then((response) => {
+            if(!response.ok) {
+                return Promise.reject(new Error('Request failed'));
+            }
+
+            // TODO Verify content-type
+            return response.json();
+        });
     }
 }
 
