@@ -1,3 +1,4 @@
+/* eslint-disable no-console, no-new */
 /* global netflix */
 
 
