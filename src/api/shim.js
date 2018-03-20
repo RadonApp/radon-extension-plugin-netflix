@@ -1,8 +1,8 @@
 import EventEmitter from 'eventemitter3';
 import IsNil from 'lodash-es/isNil';
 import Merge from 'lodash-es/merge';
+import Runtime from 'wes/runtime';
 
-import Extension from 'neon-extension-browser/extension';
 import {awaitBody} from 'neon-extension-framework/document/await';
 import {createScript} from 'neon-extension-framework/core/helpers/script';
 
@@ -158,7 +158,7 @@ class ShimApi extends EventEmitter {
 
         // Wait until body is available
         return awaitBody().then(() => {
-            let script = createScript(document, Extension.getUrl('/source/netflix/shim/shim.js'));
+            let script = createScript(document, Runtime.getURL('/source/netflix/shim/shim.js'));
 
             // Create events interface
             this._events = new ShimEvents();
