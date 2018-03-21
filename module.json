@@ -4,20 +4,17 @@
   "content_scripts": [
     {
       "id": "main",
+
       "conditions": [
-        {
-          "pattern": "*://netflix.com/*",
-          "pageUrl": {
-            "hostEquals": "netflix.com"
-          }
-        },
-        {
-          "pattern": "*://www.netflix.com/*",
-          "pageUrl": {
-            "hostEquals": "www.netflix.com"
-          }
-        }
+        { "pageUrl": { "hostEquals": "netflix.com" } },
+        { "pageUrl": { "hostEquals": "www.netflix.com" } }
       ],
+
+      "matches": [
+        "*://netflix.com/*",
+        "*://www.netflix.com/*"
+      ],
+
       "js": [
         "common.js",
         "source/common.js",
