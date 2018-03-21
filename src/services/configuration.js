@@ -11,7 +11,7 @@ import Plugin from '../core/plugin';
 
 
 export const Options = [
-    new Page(Plugin, null, Plugin.info, [
+    new Page(Plugin, null, Plugin.title, [
         new EnableOption(Plugin, 'enabled', 'Enabled', {
             default: false,
 
