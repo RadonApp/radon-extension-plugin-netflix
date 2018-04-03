@@ -1,6 +1,8 @@
 import merge from 'lodash-es/merge';
 import URI from 'urijs';
 
+import {fetch} from 'neon-extension-framework/core/fetch';
+
 import MetadataInterface from './interfaces/metadata';
 import Shim from './shim';
 
