@@ -188,7 +188,7 @@ export class PlayerObserver extends Observer {
             .on('removed', this.onVideoRemoved.bind(this));
 
         // Observe title
-        this.title = this.observe(this.info, 'h4', { text: true })
+        this.title = this.observe(this.info, 'h4:not(.ellipsize-text)', { text: true })
             .on('mutation', this.onTitleChanged.bind(this));
 
         // Observe subtitle
