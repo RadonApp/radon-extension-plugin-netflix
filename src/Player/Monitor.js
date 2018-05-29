@@ -82,7 +82,7 @@ export default class PlayerMonitor extends EventEmitter {
         let match = /^\/watch\/(\d+)$/g.exec(current);
 
         if(!IsNil(match)) {
-            this._currentId = match[1];
+            this._currentId = parseInt(match[1], 10);
         } else {
             this._currentId = null;
         }
@@ -194,7 +194,7 @@ export default class PlayerMonitor extends EventEmitter {
         let title = this._currentTitle;
         let subtitle = this._currentSubtitle;
 
-        if(!this._stringExists(id) || !this._stringExists(title)) {
+        if(IsNil(id) || !this._stringExists(title)) {
             return null;
         }
 
