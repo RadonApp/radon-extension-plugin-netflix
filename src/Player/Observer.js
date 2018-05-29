@@ -1,4 +1,5 @@
 /* eslint-disable no-multi-spaces, key-spacing */
+import Debounce from 'lodash-es/debounce';
 import EventEmitter from 'eventemitter3';
 import IsEqual from 'lodash-es/isEqual';
 import IsNil from 'lodash-es/isNil';
@@ -150,9 +151,13 @@ export class PlayerObserver extends Observer {
         this.title = null;
         this.subtitle = null;
 
+        // Create debounced observe function
+        this.observeVideo = Debounce(this._observeVideo.bind(this), 1000);
+
         // Private attributes
         this._currentTitle = null;
         this._currentSubtitles = null;
+        this._currentVideo = null;
 
         // Create video observer
         this._videoObserver = new PlayerVideoObserver();
@@ -204,8 +209,11 @@ export class PlayerObserver extends Observer {
     onVideoAdded({ node }) {
         Log.trace('Video added: %o', node);
 
-        // Start observing video
-        this._videoObserver.start(node);
+        // Update state
+        this._currentVideo = node;
+
+        // Observe video
+        this.observeVideo();
 
         // Emit "opened" event
         this.emit('opened');
@@ -213,6 +221,9 @@ export class PlayerObserver extends Observer {
 
     onVideoRemoved({ node }) {
         Log.trace('Video removed: %o', node);
+
+        // Reset state
+        this._currentVideo = null;
 
         // Stop observing video
         this._videoObserver.stop();
@@ -244,6 +255,9 @@ export class PlayerObserver extends Observer {
 
         // Log title change
         Log.trace('Title changed to %o', current);
+
+        // Observe video
+        this.observeVideo();
     }
 
     onSubtitleChanged({ event }) {
@@ -272,9 +286,26 @@ export class PlayerObserver extends Observer {
 
         // Log subtitle change
         Log.trace('Subtitle changed to %o', current);
+
+        // Observe video
+        this.observeVideo();
     }
 
     // endregion
+
+    _observeVideo() {
+        if(IsNil(this._currentTitle)) {
+            return;
+        }
+
+        if(IsNil(this._currentVideo)) {
+            Log.error('Unable to observe video, no node available');
+            return;
+        }
+
+        // Start observing video
+        this._videoObserver.start(this._currentVideo);
+    }
 }
 
 export default new PlayerObserver();
