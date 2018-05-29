@@ -4,9 +4,9 @@ import IsEqual from 'lodash-es/isEqual';
 import IsNil from 'lodash-es/isNil';
 import Map from 'lodash-es/map';
 
-import ApplicationObserver from '../application/observer';
-import Log from '../core/logger';
-import Observer from '../base/observer';
+import ApplicationObserver from 'neon-extension-source-netflix/Application/Observer';
+import Log from 'neon-extension-source-netflix/Core/Logger';
+import Observer from 'neon-extension-source-netflix/Base/Observer';
 
 
 export class PlayerVideoObserver extends EventEmitter {

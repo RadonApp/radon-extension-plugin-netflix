@@ -1,10 +1,10 @@
 import merge from 'lodash-es/merge';
 import URI from 'urijs';
 
-import {fetch} from 'neon-extension-framework/core/fetch';
+import {fetch} from 'neon-extension-framework/Core/Fetch';
 
-import MetadataInterface from './interfaces/metadata';
-import Shim from './shim';
+import MetadataInterface from './Interfaces/Metadata';
+import Shim from './Shim';
 
 
 const BaseUrl = 'https://www.netflix.com/api/shakti';

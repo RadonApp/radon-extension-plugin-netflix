@@ -1,4 +1,4 @@
-import Interface from './base';
+import Interface from './Base';
 
 
 export default class MetadataInterface extends Interface {

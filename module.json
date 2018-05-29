@@ -16,28 +16,27 @@
       ],
 
       "js": [
-        "common.js",
-        "source/common.js",
-        "source/netflix/netflix.js"
+        "Common.js",
+        "Modules/Common.js",
+        "Modules/neon-extension-source-netflix/Main.js"
       ]
     }
   ],
   "services": [
-    "configuration",
-
-    "source/activity"
+    "Configuration",
+    "Source:Activity"
   ],
   "origins": [
     "*://netflix.com/*",
     "*://www.netflix.com/*"
   ],
   "web_accessible_resources": [
-    "source/netflix/shim/shim.js"
+    "Modules/neon-extension-source-netflix/Shim.js"
   ],
 
   "webpack": {
-    "modules": [
-      "shim"
-    ]
+    "modules": {
+      "Shim": { "entry": true }
+    }
   }
 }

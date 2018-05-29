@@ -1,7 +1,8 @@
 /* eslint-disable no-console, no-new */
-/* global netflix */
 import EventEmitter from 'eventemitter3';
 import IsNil from 'lodash-es/isNil';
+
+import {retry} from 'neon-extension-framework/Utilities/Promise';
 
 
 export class ShimRequests extends EventEmitter {
@@ -60,12 +61,46 @@ export class Shim {
     }
 
     configuration() {
-        let models = netflix.reactContext.models;
+        retry(() => {
+            if(IsNil(window.netflix)) {
+                return Promise.reject(new Error('Unable to find "netflix" object'));
+            }
 
-        // Emit "configuration" event
-        this._emit('configuration', {
-            serverDefs: models.serverDefs.data,
-            userInfo: models.userInfo.data
+            if(IsNil(window.netflix.reactContext)) {
+                return Promise.reject(new Error('Unable to find "netflix.reactContext" object'));
+            }
+
+            if(IsNil(window.netflix.reactContext.models)) {
+                return Promise.reject(new Error('Unable to find "netflix.reactContext.models" object'));
+            }
+
+            let models = window.netflix.reactContext.models;
+
+            // Build configuration object
+            let configuration = {
+                serverDefs: models && models.serverDefs && models.serverDefs.data,
+                userInfo: models && models.userInfo && models.userInfo.data
+            };
+
+            // Validate configuration
+            if(IsNil(configuration.userInfo)) {
+                return Promise.reject(new Error('Invalid "serverDefs" model'));
+            }
+
+            if(IsNil(configuration.userInfo)) {
+                return Promise.reject(new Error('Invalid "userInfo" model'));
+            }
+
+            // Resolve with configuration
+            return configuration;
+        }).then((configuration) => {
+            // Emit "configuration" event
+            this._emit('configuration', configuration);
+        }, (err) => {
+            console.error('Unable to retrieve configuration', err && err.message ? err.message : err);
+
+            // Emit "configuration" event
+            this._emit('configuration', null);
         });
     }
 
