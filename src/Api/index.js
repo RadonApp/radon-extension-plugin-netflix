@@ -1,10 +1,10 @@
-import merge from 'lodash-es/merge';
+import Merge from 'lodash-es/merge';
 import URI from 'urijs';
 
 import {fetch} from 'neon-extension-framework/Core/Fetch';
 
 import MetadataInterface from './Interfaces/Metadata';
-import Shim from './Shim';
+import ShimApi from './Shim';
 
 
 const BaseUrl = 'https://www.netflix.com/api/shakti';
@@ -16,14 +16,14 @@ export class Api {
     }
 
     request(method, path, options) {
-        options = merge({
+        options = Merge({
             query: {}
         }, options || {});
 
         // Retrieve configuration
-        return Shim.configuration().then(function({ serverDefs }) {
+        return ShimApi.configuration().then(function({ serverDefs }) {
             // Add default parameters
-            options.query = merge({
+            options.query = Merge({
                 _: Date.now()
             }, options.query || {});
 
