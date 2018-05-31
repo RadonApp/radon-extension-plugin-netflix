@@ -91,6 +91,7 @@ export default class PlayerMonitor extends EventEmitter {
     onOpened() {
         Log.trace('PlayerMonitor.onOpened');
 
+        // Ensure item exists
         if(IsNil(this._currentItem)) {
             return;
         }
@@ -103,20 +104,16 @@ export default class PlayerMonitor extends EventEmitter {
         Log.trace('PlayerMonitor.onLoaded');
 
         // Update item
-        if(this._updateItem()) {
-            this.emit('created', this._currentItem);
-        } else if(!IsNil(this._currentItem)) {
-            this.emit('loaded', this._currentItem);
+        if(!this._updateItem()) {
+            return;
         }
+
+        // Emit "loaded" event
+        this.emit('loaded', this._currentItem);
     }
 
     onStarted() {
         Log.trace('PlayerMonitor.onStarted');
-
-        // Update item
-        if(this._updateItem()) {
-            this.emit('created', this._currentItem);
-        }
 
         // Ensure item exists
         if(IsNil(this._currentItem)) {
