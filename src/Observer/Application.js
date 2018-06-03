@@ -1,5 +1,5 @@
-import Log from 'neon-extension-source-netflix/Core/Logger';
-import Observer from 'neon-extension-source-netflix/Base/Observer';
+import Log from '../Core/Logger';
+import Observer from './Base';
 
 
 export class ApplicationObserver extends Observer {

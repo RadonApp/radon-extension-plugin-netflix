@@ -4,11 +4,12 @@ import IsNil from 'lodash-es/isNil';
 
 import ActivityService, {ActivityEngine} from 'neon-extension-framework/Services/Source/Activity';
 import Registry from 'neon-extension-framework/Core/Registry';
-import Api from 'neon-extension-source-netflix/Api';
-import Log from 'neon-extension-source-netflix/Core/Logger';
-import PlayerMonitor from 'neon-extension-source-netflix/Player/Monitor';
-import Plugin from 'neon-extension-source-netflix/Core/Plugin';
-import ShimApi from 'neon-extension-source-netflix/Api/Shim';
+
+import Api from '../Api';
+import Log from '../Core/Logger';
+import PlayerMonitor from '../Player/Monitor';
+import Plugin from '../Core/Plugin';
+import ShimApi from '../Api/Shim';
 
 
 export class NetflixActivityService extends ActivityService {

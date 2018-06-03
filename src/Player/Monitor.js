@@ -3,12 +3,12 @@ import EventEmitter from 'eventemitter3';
 import IsNil from 'lodash-es/isNil';
 import IsString from 'lodash-es/isString';
 
-import ApplicationObserver from 'neon-extension-source-netflix/Application/Observer';
-import Log from 'neon-extension-source-netflix/Core/Logger';
-import Plugin from 'neon-extension-source-netflix/Core/Plugin';
 import {Movie, Show, Season, Episode} from 'neon-extension-framework/Models/Metadata/Video';
 
-import PlayerObserver from './Observer';
+import ApplicationObserver from '../Observer/Application';
+import Log from '../Core/Logger';
+import Plugin from '../Core/Plugin';
+import PlayerObserver from '../Observer/Player';
 
 
 export default class PlayerMonitor extends EventEmitter {
@@ -21,7 +21,6 @@ export default class PlayerMonitor extends EventEmitter {
         this._currentSubtitle = null;
 
         this._currentItem = null;
-        this._currentPath = null;
 
         // Bind to application events
         ApplicationObserver.on('navigate',  this.onNavigated.bind(this));
