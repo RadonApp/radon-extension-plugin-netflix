@@ -26,7 +26,6 @@ export class NetflixActivityService extends ActivityService {
         // Create activity engine
         this.engine = new ActivityEngine(this.plugin, {
             getMetadata: this.getMetadata.bind(this),
-            fetchMetadata: this.fetchMetadata.bind(this),
 
             isEnabled: () => true
         });
@@ -51,16 +50,7 @@ export class NetflixActivityService extends ActivityService {
             ));
         }
 
-        // Update duration
-        if(IsNil(item.duration) || duration > item.duration) {
-            item.duration = duration;
-        }
-
-        // Resolve promise with `item`
-        return Promise.resolve(item);
-    }
-
-    fetchMetadata(item) {
+        // Retrieve identifier
         let id = Get(item.keys, [Plugin.id, 'id']);
 
         if(IsNil(id)) {
@@ -71,6 +61,11 @@ export class NetflixActivityService extends ActivityService {
 
         // Update item `fetchedAt` timestamp
         item.update(Plugin.id, { fetchedAt });
+
+        // Update duration
+        if(IsNil(item.duration) || duration > item.duration) {
+            item.duration = duration;
+        }
 
         // Fetch album metadata
         Log.debug('Fetching metadata for "%s" (item: %o)', id, item);
@@ -101,9 +96,9 @@ export class NetflixActivityService extends ActivityService {
 
         // Update show
         item.season.show.update(Plugin.id, {
-            keys: this._createKeys({
+            keys: {
                 id: show.id
-            }),
+            },
 
             // Metadata
             title: show.title,
@@ -115,9 +110,9 @@ export class NetflixActivityService extends ActivityService {
 
         // Update season
         item.season.update(Plugin.id, {
-            keys: this._createKeys({
+            keys: {
                 id: season.id
-            }),
+            },
 
             // Metadata
             title: season.title,
@@ -131,9 +126,9 @@ export class NetflixActivityService extends ActivityService {
 
         // Update episode
         item.update(Plugin.id, {
-            keys: this._createKeys({
+            keys: {
                 id: episode.id
-            }),
+            },
 
             // Metadata
             title: episode.title,
@@ -151,9 +146,9 @@ export class NetflixActivityService extends ActivityService {
     updateMovie(item, movie, fetchedAt) {
         // Update movie
         item.update(Plugin.id, {
-            keys: this._createKeys({
+            keys: {
                 id: movie.id
-            }),
+            },
 
             // Metadata
             title: movie.title,
@@ -182,11 +177,6 @@ export class NetflixActivityService extends ActivityService {
             episode: Find(season.episodes, { seq: number }) || null,
             season
         };
-    }
-
-    _createKeys(keys) {
-        // TODO Add `keys` with country suffixes
-        return keys;
     }
 }
 
