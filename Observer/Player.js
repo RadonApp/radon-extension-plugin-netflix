@@ -1,7 +1,9 @@
 /* eslint-disable no-multi-spaces, key-spacing */
+import Debounce from 'lodash-es/debounce';
 import Filter from 'lodash-es/filter';
 import IsEqual from 'lodash-es/isEqual';
 import IsNil from 'lodash-es/isNil';
+import IsString from 'lodash-es/isString';
 import Map from 'lodash-es/map';
 
 import ApplicationObserver from './Application';
@@ -14,16 +16,20 @@ export class PlayerObserver extends Observer {
     constructor() {
         super();
 
+        // Create debounced `onMediaChanged` function
+        this.onMediaChanged = Debounce(this._onMediaChanged, 5000);
+
+        // Elements
         this.player = null;
         this.controls = null;
         this.info = null;
 
+        // Text Elements
         this.title = null;
         this.subtitle = null;
 
         // Private attributes
-        this._currentTitle = null;
-        this._currentSubtitle = null;
+        this._currentMedia = null;
         this._currentVideo = null;
 
         // Create video observer
@@ -56,19 +62,14 @@ export class PlayerObserver extends Observer {
 
         // Observe title
         this.title = this.observe(this.info, 'h4:not(.ellipsize-text)', { text: true })
-            .on('mutation', this.onTitleChanged.bind(this));
+            .on('mutation', this.onMediaChanged.bind(this));
 
         // Observe subtitle
         this.subtitle = this.observe(this.info, 'div span', { text: true })
-            .on('mutation', this.onSubtitleChanged.bind(this));
+            .on('mutation', this.onMediaChanged.bind(this));
     }
 
     observeVideo() {
-        if(IsNil(this._currentTitle)) {
-            Log.debug('Deferring video observations, no title available');
-            return;
-        }
-
         if(IsNil(this._currentVideo)) {
             Log.debug('Deferring video observations, no video available');
             return;
@@ -94,19 +95,15 @@ export class PlayerObserver extends Observer {
         // Update state
         this._currentVideo = node;
 
-        // Start video observations
-        this.observeVideo();
-
-        // Emit "opened" event
-        this.emit('opened');
+        // Emit changed event
+        this.onMediaChanged();
     }
 
     onVideoRemoved({ node }) {
         Log.trace('Video removed: %o', node);
 
         // Reset state
-        this._currentTitle = null;
-        this._currentSubtitle = null;
+        this._currentMedia = null;
         this._currentVideo = null;
 
         // Stop video observations
@@ -116,60 +113,150 @@ export class PlayerObserver extends Observer {
         this.emit('closed');
     }
 
-    onTitleChanged() {
-        let node = this.title.first();
-        let current = (node && node.innerText) || null;
+    _onMediaChanged() {
+        let current = this._createMedia(
+            this.title.first(),
+            this.subtitle.all()
+        );
 
-        // Ensure title has changed
-        if(this._currentTitle === current) {
+        // Ensure media has changed
+        if(IsEqual(this._currentMedia, current)) {
             return;
         }
 
-        // Retrieve previous title
-        let previous = this._currentTitle;
+        // Store current media
+        let previous = this._currentMedia;
 
-        // Update current title
-        this._currentTitle = current;
+        // Update current media
+        this._currentMedia = current;
 
-        // Emit event
-        this.emit('title', { previous, current });
+        // Emit "media.changed" event
+        this.emit('media.changed', { previous, current });
 
-        // Log title change
-        Log.trace('Title changed to %o', current);
+        // Log media change
+        Log.trace('Media changed to %o', current);
 
-        // Start video observations
-        this.observeVideo();
+        // Start observing video
+        if(!IsNil(current)) {
+            this.observeVideo();
+        }
+
+        // Emit "opened" event
+        this.emit('opened');
     }
 
-    onSubtitleChanged() {
-        let current = Filter(Map(this.subtitle.all(), (node) => node.innerText || null, IsNil));
+    // endregion
 
-        if(current.length === 0) {
-            current = null;
+    // region Private Methods
+
+    _createMedia($title, $subtitles) {
+        let title = ($title && $title.innerText) || null;
+
+        // Ensure title exists
+        if(IsNil(title) || !IsString(title) || title.length <= 0) {
+            return null;
         }
 
-        // Ensure subtitle(s) have changed
-        if(IsEqual(this._currentSubtitle, current)) {
-            return;
+        // Parse subtitles
+        let subtitles = Filter(Map($subtitles, (node) =>
+            node.innerText || null
+        ), (value) =>
+            !IsNil(value)
+        );
+
+        // Create movie (no identifier exists)
+        if(subtitles.length < 1) {
+            this._createMovie(title);
         }
 
-        // Retrieve previous subtitle(s)
-        let previous = this._currentSubtitle;
+        // Create episode
+        return this._createEpisode(title, ...subtitles);
+    }
 
-        // Update current subtitle(s)
-        this._currentSubtitle = current;
+    _createMovie(title) {
+        return {
+            type: 'movie',
 
-        // Update application navigation
-        ApplicationObserver.onNavigated();
+            // Metadata
+            title
+        };
+    }
 
-        // Emit event
-        this.emit('subtitle', { previous, current });
+    _createEpisode(show, identifier) {
+        let { season, number } = this._parseEpisodeIdentifier(identifier);
 
-        // Log subtitle change
-        Log.trace('Subtitle changed to %o', current);
+        if(IsNil(season) || IsNil(number)) {
+            return null;
+        }
 
-        // Start video observations
-        this.observeVideo();
+        return {
+            type: 'episode',
+
+            // Metadata
+            number,
+
+            // Children
+            season: this._createSeason(show, season)
+        };
+    }
+
+    _createSeason(show, number) {
+        return {
+            type: 'season',
+
+            // Metadata
+            number,
+
+            // Children
+            show: this._createShow(show)
+        };
+    }
+
+    _createShow(title) {
+        return {
+            type: 'show',
+
+            // Metadata
+            title
+        };
+    }
+
+    _parseEpisodeIdentifier(identifier) {
+        let match = /^\w(\d+):\w(\d+)$/g.exec(identifier);
+
+        if(IsNil(match)) {
+            return {
+                season: null,
+                number: null
+            };
+        }
+
+        // Try parse numbers
+        try {
+            return {
+                season: parseInt(match[1], 10),
+                number: parseInt(match[2], 10)
+            };
+        } catch(e) {
+            Log.warn('Unable to parse episode number: %o', identifier);
+
+            return {
+                season: null,
+                number: null
+            };
+        }
+    }
+
+    _stringExists(value) {
+        if(IsNil(value)) {
+            return false;
+        }
+
+        if(!IsString(value)) {
+            return false;
+        }
+
+        return value.length > 0;
     }
 
     // endregion

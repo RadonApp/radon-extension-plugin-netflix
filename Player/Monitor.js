@@ -1,7 +1,6 @@
 /* eslint-disable no-multi-spaces, key-spacing */
 import EventEmitter from 'eventemitter3';
 import IsNil from 'lodash-es/isNil';
-import IsString from 'lodash-es/isString';
 
 import {Movie, Show, Season, Episode} from 'neon-extension-framework/Models/Metadata/Video';
 
@@ -17,22 +16,19 @@ export default class PlayerMonitor extends EventEmitter {
 
         // Private attributes
         this._currentId = null;
-        this._currentTitle = null;
-        this._currentSubtitle = null;
-
+        this._currentMedia = null;
         this._currentItem = null;
 
         // Bind to application events
         ApplicationObserver.on('navigate',  this.onNavigated.bind(this));
 
         // Bind to player events
+        PlayerObserver.on('media.changed',  this.onMediaChanged.bind(this));
+
         PlayerObserver.on('opened',         this.onOpened.bind(this));
         PlayerObserver.on('closed',         this.onClosed.bind(this));
         PlayerObserver.on('loaded',         this.onLoaded.bind(this));
         PlayerObserver.on('started',        this.onStarted.bind(this));
-
-        PlayerObserver.on('title',          this.onTitleChanged.bind(this));
-        PlayerObserver.on('subtitle',       this.onSubtitleChanged.bind(this));
 
         PlayerObserver.on('paused',         this.emit.bind(this, 'paused'));
         PlayerObserver.on('stopped',        this.emit.bind(this, 'stopped'));
@@ -54,9 +50,7 @@ export default class PlayerMonitor extends EventEmitter {
 
         // Reset state
         this._currentId = null;
-        this._currentTitle = null;
-        this._currentSubtitle = null;
-
+        this._currentMedia = null;
         this._currentItem = null;
     }
 
@@ -134,16 +128,10 @@ export default class PlayerMonitor extends EventEmitter {
         this.emit('closed', this._currentItem);
     }
 
-    onTitleChanged({ previous, current }) {
-        Log.trace('PlayerMonitor.onTitleChanged: %o -> %o', previous, current);
+    onMediaChanged({ previous, current }) {
+        Log.trace('PlayerMonitor.onMediaChanged: %o -> %o', previous, current);
 
-        this._currentTitle = current;
-    }
-
-    onSubtitleChanged({ previous, current }) {
-        Log.trace('PlayerMonitor.onSubtitleChanged: %o -> %o', previous, current);
-
-        this._currentSubtitle = current;
+        this._currentMedia = current;
     }
 
     // endregion
@@ -162,11 +150,7 @@ export default class PlayerMonitor extends EventEmitter {
 
         // Ensure track exists
         if(IsNil(item)) {
-            Log.warn('Unable to parse item', {
-                id: this._currentId,
-                title: this._currentTitle,
-                subtitle: this._currentSubtitle
-            });
+            Log.warn('Unable to parse item', this._currentMedia);
 
             // Clear current item
             this._currentItem = null;
@@ -186,112 +170,66 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _createItem() {
-        let id = this._currentId;
-        let title = this._currentTitle;
-        let subtitle = this._currentSubtitle;
-
-        if(IsNil(id) || !this._stringExists(title)) {
+        if(IsNil(this._currentId) || IsNil(this._currentMedia)) {
             return null;
         }
 
-        // Movie
-        if(IsNil(subtitle)) {
-            return this._createMovie(title, id);
+        // Create metadata
+        let media = this._currentMedia;
+
+        // - Movie
+        if(media.type === 'movie') {
+            return this._createMovie(this._currentId, media);
         }
 
-        // Episode
-        return this._createEpisode(title, id, ...subtitle);
+        // - Episode
+        if(media.type === 'episode') {
+            return this._createEpisode(this._currentId, media);
+        }
+
+        // Unknown media type
+        throw new Error(`Unknown media type: ${media.type}`);
     }
 
-    _createMovie(title, id) {
+    _createMovie(id, { title }) {
         return Movie.create(Plugin.id, {
-            keys: this._createKeys({
+            keys: {
                 id
-            }),
+            },
 
             // Metadata
             title
         });
     }
 
-    _createShow(title) {
-        return Show.create(Plugin.id, {
-            title
+    _createEpisode(id, { number, season }) {
+        return Episode.create(Plugin.id, {
+            keys: {
+                id
+            },
+
+            // Metadata
+            number,
+
+            // Children
+            season: this._createSeason(season)
         });
     }
 
-    _createSeason(showTitle, number) {
+    _createSeason({ number, show }) {
         return Season.create(Plugin.id, {
             // Metadata
             number,
 
             // Children
-            show: this._createShow(showTitle)
+            show: this._createShow(show)
         });
     }
 
-    _createEpisode(showTitle, id, identifier, title) {
-        let { season, number } = this._parseEpisodeIdentifier(identifier);
-
-        if(IsNil(season) || IsNil(number)) {
-            return null;
-        }
-
-        return Episode.create(Plugin.id, {
-            keys: this._createKeys({
-                id
-            }),
-
-            // Metadata
-            title,
-            number,
-
-            // Children
-            season: this._createSeason(showTitle, season)
+    _createShow({ title }) {
+        return Show.create(Plugin.id, {
+            title
         });
-    }
-
-    _createKeys(keys) {
-        // TODO Add `keys` with country suffixes
-        return keys;
-    }
-
-    _parseEpisodeIdentifier(number) {
-        let match = /^\w(\d+):\w(\d+)$/g.exec(number);
-
-        if(IsNil(match)) {
-            return {
-                season: null,
-                number: null
-            };
-        }
-
-        // Try parse numbers
-        try {
-            return {
-                season: parseInt(match[1], 10),
-                number: parseInt(match[2], 10)
-            };
-        } catch(e) {
-            Log.warn('Unable to parse episode number: %o', number);
-
-            return {
-                season: null,
-                number: null
-            };
-        }
-    }
-
-    _stringExists(value) {
-        if(IsNil(value)) {
-            return false;
-        }
-
-        if(!IsString(value)) {
-            return false;
-        }
-
-        return value.length > 0;
     }
 
     // endregion
