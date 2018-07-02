@@ -131,6 +131,10 @@ export default class PlayerMonitor extends EventEmitter {
     onMediaChanged({ previous, current }) {
         Log.trace('PlayerMonitor.onMediaChanged: %o -> %o', previous, current);
 
+        // Detect navigation change (to next video)
+        ApplicationObserver.onNavigated();
+
+        // Update state
         this._currentMedia = current;
     }
 
