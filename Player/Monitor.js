@@ -174,7 +174,13 @@ export default class PlayerMonitor extends EventEmitter {
     }
 
     _createItem() {
-        if(IsNil(this._currentId) || IsNil(this._currentMedia)) {
+        if(IsNil(this._currentId)) {
+            Log.debug('Unable to create item, no identifier available');
+            return null;
+        }
+
+        if(IsNil(this._currentMedia)) {
+            Log.debug('Unable to create item, no media available');
             return null;
         }
 
