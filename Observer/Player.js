@@ -92,6 +92,14 @@ export class PlayerObserver extends Observer {
     onVideoAdded({ node }) {
         Log.trace('Video added: %o', node);
 
+        // Stop existing session
+        if(!IsNil(this._currentVideo) && this._currentVideo !== node) {
+            Log.trace('Video already being observed, emitting remove event');
+
+            // Stop observing existing video
+            this.onVideoRemoved({ node: this._currentVideo });
+        }
+
         // Update state
         this._currentVideo = node;
 
@@ -101,6 +109,12 @@ export class PlayerObserver extends Observer {
 
     onVideoRemoved({ node }) {
         Log.trace('Video removed: %o', node);
+
+        // Ensure video is being observed
+        if(IsNil(this._currentVideo)) {
+            Log.trace('Ignoring video removed event (no active video)');
+            return;
+        }
 
         // Reset state
         this._currentMedia = null;
