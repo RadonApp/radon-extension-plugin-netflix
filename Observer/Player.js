@@ -17,7 +17,7 @@ export class PlayerObserver extends Observer {
         super();
 
         // Create debounced `onMediaChanged` function
-        this.onMediaChanged = Debounce(this._onMediaChanged, 5000);
+        this.onMediaChanged = Debounce(this._onMediaChanged.bind(this), 5000);
 
         // Elements
         this.player = null;
@@ -110,18 +110,15 @@ export class PlayerObserver extends Observer {
     onVideoRemoved({ node }) {
         Log.trace('Video removed: %o', node);
 
-        // Ensure video is being observed
-        if(IsNil(this._currentVideo)) {
-            Log.trace('Ignoring video removed event (no active video)');
+        // Stop video observations
+        if(!this._videoObserver.stop(node)) {
+            Log.trace('Ignoring video removed event (video isn\'t being observed)');
             return;
         }
 
         // Reset state
         this._currentMedia = null;
         this._currentVideo = null;
-
-        // Stop video observations
-        this._videoObserver.stop(node);
 
         // Emit "closed" event
         this.emit('closed');
@@ -150,10 +147,14 @@ export class PlayerObserver extends Observer {
         // Log media change
         Log.trace('Media changed to %o', current);
 
-        // Start observing video
-        if(!IsNil(current)) {
-            this.observeVideo();
+        // Stop observing video
+        if(IsNil(current)) {
+            this.onVideoRemoved({ node: this._currentVideo });
+            return;
         }
+
+        // Start observing video
+        this.observeVideo();
 
         // Emit "opened" event
         this.emit('opened');
