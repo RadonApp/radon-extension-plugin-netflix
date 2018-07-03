@@ -50,8 +50,11 @@ export class PlayerObserver extends Observer {
         // Ensure application observer has been started
         ApplicationObserver.start();
 
+        // Observe container
+        this.container = this.observe(ApplicationObserver.mount, '.sizing-wrapper .AkiraPlayer');
+
         // Observe player
-        this.player = this.observe(ApplicationObserver.mount, '.sizing-wrapper .AkiraPlayer');
+        this.player = this.observe(this.container, '.nfp:not(.preplay)');
         this.controls = this.observe(this.player, '.controls');
         this.info = this.observe(this.controls, '.video-title');
 
