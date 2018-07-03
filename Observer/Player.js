@@ -64,7 +64,7 @@ export class PlayerObserver extends Observer {
             .on('removed', this.onVideoRemoved.bind(this));
 
         // Observe title
-        this.title = this.observe(this.info, 'h4:not(.ellipsize-text)', { text: true })
+        this.title = this.observe(this.info, 'h4', { text: true })
             .on('mutation', this.onMediaChanged.bind(this));
 
         // Observe subtitle
@@ -184,7 +184,7 @@ export class PlayerObserver extends Observer {
 
         // Create movie (no identifier exists)
         if(subtitles.length < 1) {
-            this._createMovie(title);
+            return this._createMovie(title);
         }
 
         // Create episode
