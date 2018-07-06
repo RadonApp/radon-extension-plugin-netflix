@@ -87,6 +87,9 @@ export class NetflixActivityService extends ActivityService {
             return item;
         }
 
+        // Remove `id` from episode (unknown target, could be show or episode)
+        delete item.keys[Plugin.id].id;
+
         // Retrieve show year (from first season)
         let year;
 
