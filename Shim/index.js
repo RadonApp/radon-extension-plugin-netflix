@@ -2,7 +2,7 @@
 import EventEmitter from 'eventemitter3';
 import IsNil from 'lodash-es/isNil';
 
-import {retry} from 'neon-extension-framework/Utilities/Promise';
+import {retry} from '@radon-extension/framework/Utilities/Promise';
 
 
 export class ShimRequests extends EventEmitter {

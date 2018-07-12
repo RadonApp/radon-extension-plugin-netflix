@@ -1,22 +1,22 @@
 {
-  "name": "neon-extension-source-netflix",
+  "name": "@radon-extension/plugin-netflix",
   "version": "2.1.0",
   "description": "Radon Extension: Netflix",
   "keywords": [
-    "neon",
-    "neon-extension",
+    "radon",
+    "radon-extension",
     "netflix"
   ],
-  "homepage": "https://github.com/NeApp/neon-extension",
+  "homepage": "https://github.com/RadonApp/radon-extension",
   "author": "Dean Gardiner <me@dgardiner.net>",
   "license": "GPL-3.0",
   "main": "./src",
   "bugs": {
-    "url": "https://github.com/NeApp/neon-extension/issues"
+    "url": "https://github.com/RadonApp/radon-extension/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NeApp/neon-extension-source-netflix"
+    "url": "https://github.com/RadonApp/radon-extension-plugin-netflix"
   },
   "dependencies": {
     "eventemitter3": "^2.0.0",
@@ -58,7 +58,7 @@
     "whatwg-fetch": "^2.0.4"
   },
   "peerDependencies": {
-    "neon-extension-framework": "^2.1"
+    "@radon-extension/framework": "^2.1"
   },
   "scripts": {
     "lint": "eslint .",

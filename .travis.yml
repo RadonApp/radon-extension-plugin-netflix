@@ -3,7 +3,7 @@ node_js:
 - '7'
 before_install:
 - npm install -g npm@'^5.10.0'
-- npm install -g NeApp/neon-extension-build#$TRAVIS_BRANCH || npm install -g NeApp/neon-extension-build#develop
+- npm install -g RadonApp/radon-extension-build#$TRAVIS_BRANCH || npm install -g RadonApp/radon-extension-build#develop
 install:
 - neb travis:install $TRAVIS_BRANCH
 - neb package:validate
@@ -21,5 +21,5 @@ deploy:
   api_key:
     secure: U7QlGJLsQnOb8PHbT/YoLA9MnuOdOZQ5qxoAr+c2hvWcDNRo9YFbIJtGTIrw2gjyVd5WtRipjWi5zgDlv1jeHnoQ6pTZH/Y8uaGrm3X315S8uOwgg1xwom7Xg2iW9i3FrdqE+dtuiP+1uTfdsPUpzaIqVD590wK1VyauyB+yQ2Gi9TMGojYbxVCAOIE3PKJy9DFaZpIlHEWEnLCrerqeQXXS3fu6ZQCPudUprsy6KuMFbSSiJoE0tc9hZQClb/OlpC6LQgsfNhB/2DnobX/11OudwlSXKFriLdWwlZPCU9VvfBGKlcVwYARTHaK3tlQBIQpBoDC1U6hUiIhOg3RhGM3uxewl7T03xtY0BN4LOEFzPBHC+B5vGMy3A46zvlskJiaPv3qpRkWFW02iQvKrBRuuHz+pPwDj9MerM6Wnvfure/YjsuVAPLZdaRJUX9S+bTWF5xWSgDyLukDHtcfMfiBb23G2P2BffiuNvnHplhGTm3L9JDPdN3/3QiV3RFjvkOFSqsHuMMJaU266auiJXFdlooPprS5IMh8hzJ6Tdj60AFlFpobLQ4+N0bBE3tnyjyh6ObxNRd/x+Om8RccRA+/2uGpH4Mg0e+ZohIrRszsiFV2Xv7CGKdL710d/CZ1rQ291zGaAFCIcGlzclmBsfl7BbAJcNuhTHJyvT/9F/0M=
   on:
-    repo: NeApp/neon-extension-source-netflix
+    repo: RadonApp/radon-extension-plugin-netflix
     tags: true
