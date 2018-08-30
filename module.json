@@ -17,8 +17,8 @@
 
       "js": [
         "Common.js",
-        "Modules/Common.js",
-        "Modules/neon-extension-source-netflix/Main.js"
+        "Plugins/Common.js",
+        "Plugins/netflix/Main.js"
       ]
     }
   ],
@@ -31,7 +31,7 @@
     "*://www.netflix.com/*"
   ],
   "web_accessible_resources": [
-    "Modules/neon-extension-source-netflix/Shim.js"
+    "Plugins/netflix/Shim.js"
   ],
 
   "webpack": {

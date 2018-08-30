@@ -158,7 +158,7 @@ class ShimApi extends EventEmitter {
 
         // Wait until body is available
         return awaitBody().then(() => {
-            let script = createScript(document, Runtime.getURL('/Modules/neon-extension-source-netflix/Shim.js'));
+            let script = createScript(document, Runtime.getURL('/Plugins/netflix/Shim.js'));
 
             // Create events interface
             this._events = new ShimEvents();
