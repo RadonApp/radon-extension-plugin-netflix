@@ -244,7 +244,7 @@ export class PlayerObserver extends Observer {
     }
 
     _parseEpisodeIdentifier(identifier) {
-        let match = /^\w(\d+):\w(\d+)$/g.exec(identifier);
+        let match = /^[a-z]+(?:.\s?)?(\d+)(?:\s?:\s?)[a-z]+(?:.\s?)?(\d+)$/gi.exec(identifier);
 
         if(IsNil(match)) {
             return {
