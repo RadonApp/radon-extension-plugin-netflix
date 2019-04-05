@@ -55,7 +55,7 @@ export class PlayerObserver extends Observer {
 
         // Observe player
         this.player = this.observe(this.container, '.nfp:not(.preplay)');
-        this.controls = this.observe(this.player, '.controls');
+        this.controls = this.observe(this.player, '.PlayerControlsNeo__layout');
         this.info = this.observe(this.controls, '.video-title');
 
         // Observe video
@@ -170,7 +170,7 @@ export class PlayerObserver extends Observer {
     // region Private Methods
 
     _createMedia($title, $subtitles) {
-        let title = ($title && $title.innerText) || null;
+        let title = ($title && $title.textContent) || null;
 
         // Ensure title exists
         if(IsNil(title) || !IsString(title) || title.length <= 0) {
@@ -180,7 +180,7 @@ export class PlayerObserver extends Observer {
 
         // Parse subtitles
         let subtitles = Filter(Map($subtitles, (node) =>
-            node.innerText || null
+            node.textContent || null
         ), (value) =>
             !IsNil(value)
         );
