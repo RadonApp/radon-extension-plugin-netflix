@@ -75,7 +75,12 @@ export class NetflixActivityService extends ActivityService {
                 return this.updateMovie(item, video, fetchedAt);
             }
 
-            return this.updateEpisode(item, video, fetchedAt);
+            if(video.type === 'show') {
+                return this.updateEpisode(item, video, fetchedAt);
+            }
+
+            Log.info('Ignoring video with unknown type: %s', video.type);
+            return null;
         });
     }
 
