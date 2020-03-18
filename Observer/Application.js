@@ -17,7 +17,7 @@ export class ApplicationObserver extends Observer {
         this.body = this.observe(document, 'body');
 
         // Observe mount
-        this.mount = this.observe(this.body, '#appMountPoint div[data-reactroot] div div')
+        this.mount = this.observe(this.body, '#appMountPoint div div[dir] div')
             .on('added', this.onNavigated.bind(this));
 
         // Observe page
